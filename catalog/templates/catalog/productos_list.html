@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Productos{% endblock %}
+
+{% block content %}
+    <h3>Productos</h3>
+
+    <table style="width:100%; border-collapse:collapse;">
+        <thead>
+            <tr>
+                <th style="text-align:left; padding:8px; border-bottom:1px solid #ddd;">Código de barra</th>
+                <th style="text-align:left; padding:8px; border-bottom:1px solid #ddd;">Código interno</th>
+                <th style="text-align:left; padding:8px; border-bottom:1px solid #ddd;">SKU</th>
+                <th style="text-align:left; padding:8px; border-bottom:1px solid #ddd;">Nombre</th>
+                <th style="text-align:left; padding:8px; border-bottom:1px solid #ddd;">Categoría</th>
+                <th style="text-align:right; padding:8px; border-bottom:1px solid #ddd;">Stock</th>
+                <th style="text-align:right; padding:8px; border-bottom:1px solid #ddd;">Mín.</th>
+                <th style="text-align:left; padding:8px; border-bottom:1px solid #ddd;">Estado</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for p in productos %}
+                <tr>
+                    <td style="padding:8px; border-bottom:1px solid #eee;">{{ p.codigo_barra }}</td>
+                    <td style="padding:8px; border-bottom:1px solid #eee;">{{ p.codigo_interno }}</td>
+                    <td style="padding:8px; border-bottom:1px solid #eee;">{{ p.sku }}</td>
+                    <td style="padding:8px; border-bottom:1px solid #eee;">{{ p.nombre }}</td>
+                    <td style="padding:8px; border-bottom:1px solid #eee;">{{ p.categoria.nombre }}</td>
+                    <td style="padding:8px; border-bottom:1px solid #eee; text-align:right;">{{ p.stock_actual }}</td>
+                    <td style="padding:8px; border-bottom:1px solid #eee; text-align:right;">{{ p.stock_minimo }}</td>
+                    <td style="padding:8px; border-bottom:1px solid #eee;">
+                        {% if p.stock_actual <= p.stock_minimo %}
+                            <span class="badge">⚠ Bajo</span>
+                        {% else %}
+                            <span style="display:inline-block; padding:6px 10px; border-radius:999px; background:#e7f8ee; border:1px solid #a7e3bf;">
+                                ✅ OK
+                            </span>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% empty %}
+                <tr><td colspan="6" style="padding:10px;">No hay productos.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

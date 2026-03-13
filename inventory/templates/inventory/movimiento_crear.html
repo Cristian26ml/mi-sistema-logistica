@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}Registrar movimiento{% endblock %}
+
+{% block content %}
+  <h3>Registrar movimiento</h3>
+
+  <div style="margin-bottom:12px;">
+    <span class="badge">Stock bajo: {{ bajo_stock }}</span>
+  </div>
+
+  {% if messages %}
+    {% for message in messages %}
+      <div class="msg {{ message.tags }}">{{ message }}</div>
+    {% endfor %}
+  {% endif %}
+
+  <form method="post">
+    {% csrf_token %}
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; max-width:800px;">
+
+      <div>
+        <label style="display:block; margin-bottom:6px;"><strong>Producto</strong></label>
+        <select name="producto_id" id="producto_id" required style="width:100%; padding:10px;">
+          {% for p in productos %}
+            <option value="{{ p.id }}">{{ p.sku }} - {{ p.nombre }} (stock: {{ p.stock_actual }})</option>
+          {% endfor %}
+        </select>
+
+        <div style="margin-top:8px;">
+          <small><strong>Ubicación sugerida:</strong> <span id="ubicacion_text">-</span></small>
+        </div>
+      </div>
+
+      <div>
+        <label style="display:block; margin-bottom:6px;"><strong>Ubicación</strong></label>
+        <select name="ubicacion_id" id="ubicacion_id" required style="width:100%; padding:10px;">
+          {% for u in ubicaciones %}
+            <option value="{{ u.id }}">{{ u.codigo }} - {{ u.descripcion }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div>
+        <label style="display:block; margin-bottom:6px;"><strong>Tipo</strong></label>
+        <select name="tipo" required style="width:100%; padding:10px;">
+          {% for value, label in form.fields.tipo.choices %}
+            <option value="{{ value }}">{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div>
+        <label style="display:block; margin-bottom:6px;"><strong>Cantidad</strong></label>
+        <input type="number" name="cantidad" min="1" required style="width:100%; padding:10px;">
+      </div>
+    </div>
+
+    <div style="margin-top:16px;">
+      <button class="btn" type="submit">Guardar movimiento</button>
+    </div>
+  </form>
+
+  <script>
+    const ubicaciones = {{ ubicaciones_por_producto|safe }};
+    const selectProducto = document.getElementById("producto_id");
+    const ubicacionText = document.getElementById("ubicacion_text");
+
+    function actualizarUbicacion() {
+      const pid = selectProducto.value;
+      const u = ubicaciones[pid];
+      ubicacionText.textContent = (u && u.length) ? u.join(", ") : "Sin ubicación asignada";
+    }
+
+    selectProducto.addEventListener("change", actualizarUbicacion);
+    actualizarUbicacion();
+  </script>
+{% endblock %}

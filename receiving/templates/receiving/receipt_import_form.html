@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Importar recepción{% endblock %}
+
+{% block content %}
+<h3>Importar recepción desde Excel</h3>
+
+<p>
+    Sube el archivo enviado por el proveedor para cargar automáticamente
+    los productos esperados de la recepción.
+</p>
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <div style="margin-bottom: 14px;">
+        <label>Archivo Excel</label>
+        {{ form.archivo }}
+        {% if form.archivo.errors %}
+            <div style="color:red;">{{ form.archivo.errors }}</div>
+        {% endif %}
+    </div>
+
+    {% if form.non_field_errors %}
+        <div style="margin-top:10px; color:red;">
+            {{ form.non_field_errors }}
+        </div>
+    {% endif %}
+
+    <div style="margin-top:14px; display:flex; gap:10px;">
+        <button class="btn" type="submit">Importar</button>
+
+        <a class="btn"
+            style="text-decoration:none; padding:10px 12px; display:inline-block;"
+            href="{% url 'receiving:receipt_list' %}">
+            Volver
+        </a>
+    </div>
+</form>
+
+<div style="margin-top: 24px;">
+    <h4>Formato sugerido del Excel</h4>
+    <table style="width:100%; border-collapse: collapse;">
+        <thead>
+            <tr style="border-bottom:1px solid #ccc;">
+                <th style="text-align:left; padding:8px;">sku</th>
+                <th style="text-align:left; padding:8px;">codigo_barra</th>
+                <th style="text-align:left; padding:8px;">nombre</th>
+                <th style="text-align:left; padding:8px;">cantidad</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr style="border-bottom:1px solid #eee;">
+                <td style="padding:8px;">AD</td>
+                <td style="padding:8px;">2000000000135</td>
+                <td style="padding:8px;">Alimento Humedo Hills A/D 156g</td>
+                <td style="padding:8px;">24</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+{% endblock %}

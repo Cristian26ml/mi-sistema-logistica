@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Generar ubicaciones{% endblock %}
+
+{% block content %}
+
+<h3>Generar ubicaciones por rack</h3>
+
+<form method="post">
+    {% csrf_token %}
+
+    <div class="row">
+
+        <div>
+            <label>Rack</label>
+            {{ form.rack }}
+        </div>
+
+        <div>
+            <label>Cantidad de posiciones</label>
+            {{ form.cantidad_posiciones }}
+        </div>
+
+        <div>
+            <label>Ingresar nivel</label>
+            {{ form.cantidad_niveles }}
+        </div>
+
+    </div>
+
+    <div style="margin-top:14px; display:flex; gap:10px;">
+        <button class="btn" type="submit">Generar ubicaciones</button>
+
+        <a class="btn"
+            style="text-decoration:none; padding:10px 12px; display:inline-block;"
+            href="{% url 'warehouse:ubicaciones_list' %}">
+            Volver
+        </a>
+    </div>
+</form>
+
+{% endblock %}

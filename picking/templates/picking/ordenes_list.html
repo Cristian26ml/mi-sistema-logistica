@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Órdenes Picking{% endblock %}
+
+{% block content %}
+
+    <div class="picking-header">
+        <h3>Órdenes de Picking</h3>
+
+        <a class="btn" type="submit"
+            href="{% url 'picking:orden_crear' %}">
+            + Nueva Orden
+        </a>
+    </div>
+
+    <table style="width:100%; border-collapse:collapse;">
+
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Fecha</th>
+                <th>Supervisor</th>
+                <th>Estado</th>
+                <th></th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            {% for o in ordenes %}
+
+                <tr>
+                    <td>#{{ o.id }}</td>
+                    <td>{{ o.fecha }}</td>
+                    <td>{{ o.supervisor }}</td>
+                    <td>
+                        {% if o.estado == "CREADA" %}
+                            <span class="badge">Creada</span>
+
+                        {% elif o.estado == "EN_PROCESO" %}
+                            <span class="badge" style="background:#fff7e6; border:1px solid #ffd27a;">
+                                En proceso
+                            </span>
+
+                        {% elif o.estado == "COMPLETADA" %}
+                            <span style="display:inline-block; padding:6px 10px; border-radius:999px; background:#e7f8ee; border:1px solid #a7e3bf;">
+                                Completada
+                            </span>
+
+                        {% else %}
+                            <span class="badge">Cancelada</span>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        <a href="{% url 'picking:orden_detalle' o.id %}">
+                            Abrir
+                        </a>
+                    </td>
+
+                </tr>
+
+            {% endfor %}
+
+        </tbody>
+    </table>
+
+{% endblock %}

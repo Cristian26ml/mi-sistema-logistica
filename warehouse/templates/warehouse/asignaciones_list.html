@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Asignaciones{% endblock %}
+
+{% block content %}
+    <div style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
+        <h3>Asignación Producto → Ubicación</h3>
+        <a class="btn" style="text-decoration:none; padding:10px 12px; display:inline-block;"
+            href="{% url 'warehouse:asignacion_crear' %}">+ Nueva asignación</a>
+    </div>
+
+    <div style="margin:12px 0;">
+        <a class="btn" style="text-decoration:none; padding:10px 12px; display:inline-block;"
+            href="{% url 'warehouse:consulta_ubicacion' %}">Consultar ubicación por SKU</a>
+    </div>
+
+    <table style="width:100%; border-collapse:collapse;">
+        <thead>
+            <tr>
+                <th style="text-align:left; padding:8px; border-bottom:1px solid #ddd;">SKU</th>
+                <th style="text-align:left; padding:8px; border-bottom:1px solid #ddd;">Producto</th>
+                <th style="text-align:left; padding:8px; border-bottom:1px solid #ddd;">Ubicación</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for a in asignaciones %}
+                <tr>
+                    <td style="padding:8px; border-bottom:1px solid #eee;">{{ a.producto.sku }}</td>
+                    <td style="padding:8px; border-bottom:1px solid #eee;">{{ a.producto.nombre }}</td>
+                    <td style="padding:8px; border-bottom:1px solid #eee;">{{ a.ubicacion.codigo }}</td>
+                </tr>
+            {% empty %}
+                <tr><td colspan="3" style="padding:10px;">No hay asignaciones aún.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

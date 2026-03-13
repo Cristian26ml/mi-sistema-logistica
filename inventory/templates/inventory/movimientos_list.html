@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Movimientos{% endblock %}
+
+{% block content %}
+    <h3>Movimientos</h3>
+
+    <form method="get" style="display:flex; gap:10px; flex-wrap:wrap; margin:10px 0;">
+        <input type="text" name="q" placeholder="SKU o usuario" value="{{ q }}" style="flex:1; min-width:200px;">
+        <select name="tipo" style="min-width:160px;">
+            <option value="">Todos</option>
+            {% for v, l in tipos %}
+                <option value="{{ v }}" {% if tipo == v %}selected{% endif %}>{{ l }}</option>
+            {% endfor %}
+        </select>
+        <button class="btn" type="submit">Filtrar</button>
+    </form>
+
+    <table style="width:100%; border-collapse:collapse;">
+        <thead>
+            <tr>
+                <th style="text-align:left; padding:8px; border-bottom:1px solid #ddd;">Fecha</th>
+                <th style="text-align:left; padding:8px; border-bottom:1px solid #ddd;">SKU</th>
+                <th style="text-align:left; padding:8px; border-bottom:1px solid #ddd;">Tipo</th>
+                <th style="text-align:right; padding:8px; border-bottom:1px solid #ddd;">Cantidad</th>
+                <th style="text-align:left; padding:8px; border-bottom:1px solid #ddd;">Usuario</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for m in movimientos %}
+                <tr>
+                    <td style="padding:8px; border-bottom:1px solid #eee;">{{ m.fecha }}</td>
+                    <td style="padding:8px; border-bottom:1px solid #eee;">{{ m.producto.sku }}</td>
+                    <td style="padding:8px; border-bottom:1px solid #eee;">{{ m.get_tipo_display }}</td>
+                    <td style="padding:8px; border-bottom:1px solid #eee; text-align:right;">{{ m.cantidad }}</td>
+                    <td style="padding:8px; border-bottom:1px solid #eee;">{{ m.usuario.username }}</td>
+                </tr>
+            {% empty %}
+                <tr><td colspan="5" style="padding:10px;">No hay movimientos.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Nueva categoría{% endblock %}
+
+{% block content %}
+<h3>Nueva categoría</h3>
+
+{% if form.errors %}
+    <div class="msg error">
+        {{ form.errors }}
+    </div>
+{% endif %}
+
+<form method="post" style="max-width:500px;">
+    {% csrf_token %}
+
+    <div>
+        <label><strong>Nombre</strong></label>
+        {{ form.nombre }}
+    </div>
+
+    <div style="margin-top:16px;">
+        <button class="btn" type="submit">Guardar categoría</button>
+    </div>
+</form>
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+    <h3>Mis Pickings</h3>
+
+    <table style="width:100%; border-collapse:collapse;">
+        <tr>
+            <th style="text-align:left; padding:8px; border-bottom:1px solid #ddd;">Orden</th>
+            <th style="text-align:left; padding:8px; border-bottom:1px solid #ddd;">Producto</th>
+            <th style="text-align:left; padding:8px; border-bottom:1px solid #ddd;">Cantidad</th>
+            <th style="text-align:left; padding:8px; border-bottom:1px solid #ddd;">Ubicación</th>
+            <th style="text-align:left; padding:8px; border-bottom:1px solid #ddd;"></th>
+        </tr>
+
+        {% for d in detalles %}
+        <tr>
+            <td style="padding:8px; border-bottom:1px solid #eee;">#{{ d.orden.id }}</td>
+            <td style="padding:8px; border-bottom:1px solid #eee;">{{ d.producto.sku }} - {{ d.producto.nombre }}</td>
+            <td style="padding:8px; border-bottom:1px solid #eee;">{{ d.cantidad }}</td>
+            <td style="padding:8px; border-bottom:1px solid #eee;">{{ d.ubicacion.codigo }}</td>
+            <td style="padding:8px; border-bottom:1px solid #eee;">
+                <a class="btn" href="{% url 'picking:confirmar_picking' d.id %}">
+                    Confirmar
+                </a>
+            </td>
+        </tr>
+        {% empty %}
+            <tr>
+                <td colspan="5" style="padding:10px;">No tienes pickings asignados.</td>
+            </tr>
+        {% endfor %}
+
+    </table>
+
+{% endblock %}

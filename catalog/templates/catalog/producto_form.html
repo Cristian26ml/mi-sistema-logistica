@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Nuevo producto{% endblock %}
+
+{% block content %}
+<h3>Nuevo producto</h3>
+
+{% if form.errors %}
+    <div class="msg error">
+        {{ form.errors }}
+    </div>
+{% endif %}
+
+<form method="post" style="max-width:700px;">
+    {% csrf_token %}
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; width:100%; gap:30px;">
+
+        <div>
+            <label><strong>SKU</strong></label>
+            {{ form.sku }}
+        </div>
+
+        <div>
+            <label><strong>Nombre</strong></label>
+            {{ form.nombre }}
+        </div>
+
+        <div>
+            <label><strong>Categoría</strong></label>
+            {{ form.categoria }}
+        </div>
+
+        <div>
+            <label><strong>Stock mínimo</strong></label>
+            {{ form.stock_minimo }}
+        </div>
+
+        <div>
+            <label><strong>Stock actual</strong></label>
+            {{ form.stock_actual }}
+        </div>
+
+    </div>
+
+    <div style="margin-top:16px;">
+        <button class="btn" type="submit">Guardar producto</button>
+    </div>
+</form>
+{% endblock %}

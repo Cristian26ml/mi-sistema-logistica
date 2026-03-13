@@ -1,0 +1,15 @@
+from django import forms
+from .models import Product, Category
+
+
+class ProductForm(forms.ModelForm):
+    class Meta:
+        model = Product
+        fields = ["codigo_barra", "codigo_interno", "sku",
+                  "nombre", "categoria", "stock_minimo", "stock_actual"]
+
+
+class CategoryForm(forms.ModelForm):
+    class Meta:
+        model = Category
+        fields = ["nombre"]

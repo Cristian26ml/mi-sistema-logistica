@@ -1,0 +1,54 @@
+{% load static %}
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Iniciar sesión</title>
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+</head>
+<body class="login-page">
+
+<div class="login-wrapper">
+    <div class="login-card-modern">
+
+        <div class="login-brand">
+            <img src="{% static 'img/logo.png' %}" alt="Logo del sistema" class="login-logo">
+            <h1>LogiSys</h1>
+            <p>Accede a tu cuenta para continuar</p>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="msg {{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        {% if form.non_field_errors %}
+            <div class="msg error">
+                {{ form.non_field_errors }}
+            </div>
+        {% endif %}
+
+        <form method="post" class="login-form">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label for="{{ form.username.id_for_label }}">Usuario</label>
+                {{ form.username }}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.password.id_for_label }}">Contraseña</label>
+                {{ form.password }}
+            </div>
+
+            <button class="btn login-btn" type="submit">Ingresar</button>
+        </form>
+    </div>
+</div>
+
+</body>
+</html>

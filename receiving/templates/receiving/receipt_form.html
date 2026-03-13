@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Nueva recepción{% endblock %}
+
+{% block content %}
+<h3>Nueva recepción</h3>
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <div class="row" style="display:grid; grid-template-columns: 1fr 1fr; gap:45px;">
+        <div>
+            <label>Proveedor</label>
+            {{ form.proveedor }}
+            {% if form.proveedor.errors %}
+                <div style="color:red;">{{ form.proveedor.errors }}</div>
+            {% endif %}
+        </div>
+
+        <div>
+            <label>Número documento</label>
+            {{ form.numero_documento }}
+            {% if form.numero_documento.errors %}
+                <div style="color:red;">{{ form.numero_documento.errors }}</div>
+            {% endif %}
+        </div>
+
+        <div>
+            <label>Fecha documento</label>
+            {{ form.fecha_documento }}
+            {% if form.fecha_documento.errors %}
+                <div style="color:red;">{{ form.fecha_documento.errors }}</div>
+            {% endif %}
+        </div>
+
+        <div>
+            <label>Archivo</label>
+            {{ form.archivo }}
+            {% if form.archivo.errors %}
+                <div style="color:red;">{{ form.archivo.errors }}</div>
+            {% endif %}
+        </div>
+
+        <div style="grid-column: 1 / -1;">
+            <label>Observación</label>
+            {{ form.observacion }}
+            {% if form.observacion.errors %}
+                <div style="color:red;">{{ form.observacion.errors }}</div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if form.non_field_errors %}
+        <div style="margin-top:10px; color:red;">
+            {{ form.non_field_errors }}
+        </div>
+    {% endif %}
+
+    <div style="margin-top:14px; display:flex; gap:10px;">
+        <button class="btn" type="submit">Guardar</button>
+
+        <a class="btn"
+            style="text-decoration:none; padding:10px 12px; display:inline-block;"
+            href="{% url 'receiving:receipt_list' %}">
+            Volver
+        </a>
+    </div>
+</form>
+{% endblock %}

@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Recepciones{% endblock %}
+
+{% block content %}
+<h3>Recepciones</h3>
+
+<div style="margin-bottom: 14px; display:flex; gap:10px;">
+    <a class="btn" style="text-decoration:none; padding:10px 12px; display:inline-block;"
+        href="{% url 'receiving:receipt_create' %}">
+        + Nueva recepción
+    </a>
+
+    <a class="btn" style="text-decoration:none; padding:10px 12px; display:inline-block;"
+        href="{% url 'receiving:receipt_import' %}">
+        Importar Excel
+    </a>
+</div>
+
+{% if recepciones %}
+    <table style="width:100%; border-collapse: collapse;">
+        <thead>
+            <tr style="border-bottom:1px solid #ccc;">
+                <th style="text-align:left; padding:8px;">Documento</th>
+                <th style="text-align:left; padding:8px;">Proveedor</th>
+                <th style="text-align:left; padding:8px;">Fecha documento</th>
+                <th style="text-align:left; padding:8px;">Estado</th>
+                <th style="text-align:left; padding:8px;">Creado por</th>
+                <th style="text-align:left; padding:8px;">Fecha creación</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for recepcion in recepciones %}
+            <tr style="border-bottom:1px solid #eee;">
+                <td style="padding:8px;">{{ recepcion.numero_documento }}</td>
+                <td style="padding:8px;">{{ recepcion.proveedor }}</td>
+                <td style="padding:8px;">{{ recepcion.fecha_documento }}</td>
+                <td style="padding:8px;">{{ recepcion.get_estado_display }}</td>
+                <td style="padding:8px;">{{ recepcion.creado_por }}</td>
+                <td style="padding:8px;">{{ recepcion.fecha_creacion|date:"d/m/Y H:i" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p>No hay recepciones registradas.</p>
+{% endif %}
+{% endblock %}

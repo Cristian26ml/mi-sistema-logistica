@@ -12,12 +12,38 @@
 <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
 
-    <div style="margin-bottom: 14px;">
-        <label>Archivo Excel</label>
-        {{ form.archivo }}
-        {% if form.archivo.errors %}
-            <div style="color:red;">{{ form.archivo.errors }}</div>
-        {% endif %}
+    <div class="row" style="display:grid; grid-template-columns: 1fr 1fr; gap:14px;">
+        <div>
+            <label>Proveedor</label>
+            {{ form.proveedor }}
+            {% if form.proveedor.errors %}
+                <div style="color:red;">{{ form.proveedor.errors }}</div>
+            {% endif %}
+        </div>
+
+        <div>
+            <label>Número documento</label>
+            {{ form.numero_documento }}
+            {% if form.numero_documento.errors %}
+                <div style="color:red;">{{ form.numero_documento.errors }}</div>
+            {% endif %}
+        </div>
+
+        <div>
+            <label>Fecha documento</label>
+            {{ form.fecha_documento }}
+            {% if form.fecha_documento.errors %}
+                <div style="color:red;">{{ form.fecha_documento.errors }}</div>
+            {% endif %}
+        </div>
+
+        <div>
+            <label>Archivo Excel</label>
+            {{ form.archivo }}
+            {% if form.archivo.errors %}
+                <div style="color:red;">{{ form.archivo.errors }}</div>
+            {% endif %}
+        </div>
     </div>
 
     {% if form.non_field_errors %}

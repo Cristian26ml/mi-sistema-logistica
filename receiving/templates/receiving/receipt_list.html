@@ -24,8 +24,9 @@
                 <th style="text-align:left; padding:8px;">Proveedor</th>
                 <th style="text-align:left; padding:8px;">Fecha documento</th>
                 <th style="text-align:left; padding:8px;">Estado</th>
-                <th style="text-align:left; padding:8px;">Creado por</th>
-                <th style="text-align:left; padding:8px;">Fecha creación</th>
+                <th style="text-align:left; padding:8px;">Líneas</th>
+                <th style="text-align:left; padding:8px;">Archivo</th>
+                <th style="text-align:left; padding:8px;">Acción</th>
             </tr>
         </thead>
         <tbody>
@@ -35,8 +36,17 @@
                 <td style="padding:8px;">{{ recepcion.proveedor }}</td>
                 <td style="padding:8px;">{{ recepcion.fecha_documento }}</td>
                 <td style="padding:8px;">{{ recepcion.get_estado_display }}</td>
-                <td style="padding:8px;">{{ recepcion.creado_por }}</td>
-                <td style="padding:8px;">{{ recepcion.fecha_creacion|date:"d/m/Y H:i" }}</td>
+                <td style="padding:8px;">{{ recepcion.detalles.count }}</td>
+                <td style="padding:8px;">
+                    {% if recepcion.archivo %}
+                        <a href="{{ recepcion.archivo.url }}" target="_blank">Ver archivo</a>
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+                <td style="padding:8px;">
+                    <a href="{% url 'receiving:receipt_detail' recepcion.id %}">Ver detalle</a>
+                </td>
             </tr>
             {% endfor %}
         </tbody>

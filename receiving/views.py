@@ -1,10 +1,14 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 
 from .forms import ReceiptForm, ReceiptImportForm
 from .models import Receipt
 from .services import importar_recepcion_desde_excel, ReceiptImportError
+
+from .forms import ReceiptScanForm
+from .models import ReceiptDetail
+from catalog.models import Product
 
 
 @login_required
@@ -24,7 +28,7 @@ def receipt_create(request):
             recepcion.creado_por = request.user
             recepcion.save()
             messages.success(request, "Recepción creada correctamente.")
-            return redirect("receiving:receipt_list")
+            return redirect("receiving:receipt_detail", receipt_id=recepcion.id)
     else:
         form = ReceiptForm()
 
@@ -61,7 +65,7 @@ def receipt_import(request):
                         f"Recepción importada correctamente con {filas_importadas} filas."
                     )
 
-                return redirect("receiving:receipt_list")
+                return redirect("receiving:receipt_detail", receipt_id=recepcion.id)
 
             except ReceiptImportError as e:
                 messages.error(request, str(e))
@@ -71,3 +75,151 @@ def receipt_import(request):
     return render(request, "receiving/receipt_import_form.html", {
         "form": form
     })
+
+
+@login_required
+def receipt_detail(request, receipt_id):
+    recepcion = get_object_or_404(
+        Receipt.objects.select_related("creado_por"),
+        id=receipt_id
+    )
+    detalles = recepcion.detalles.select_related(
+        "producto").order_by("producto__sku")
+
+    total_lineas = detalles.count()
+    total_unidades = sum(d.cantidad_esperada for d in detalles)
+
+    return render(request, "receiving/receipt_detail.html", {
+        "recepcion": recepcion,
+        "detalles": detalles,
+        "total_lineas": total_lineas,
+        "total_unidades": total_unidades,
+    })
+
+
+@login_required
+def receipt_start(request, receipt_id):
+    recepcion = get_object_or_404(Receipt, id=receipt_id)
+
+    if request.method != "POST":
+        return redirect("receiving:receipt_detail", receipt_id=recepcion.id)
+
+    if recepcion.estado != Receipt.Status.BORRADOR:
+        messages.warning(
+            request,
+            "Solo se puede iniciar una recepción que esté en estado Borrador."
+        )
+        return redirect("receiving:receipt_detail", receipt_id=recepcion.id)
+
+    if not recepcion.detalles.exists():
+        messages.error(
+            request,
+            "No puedes iniciar la recepción porque no tiene líneas cargadas."
+        )
+        return redirect("receiving:receipt_detail", receipt_id=recepcion.id)
+
+    recepcion.estado = Receipt.Status.EN_RECEPCION
+    recepcion.save(update_fields=["estado"])
+
+    messages.success(request, "La recepción fue iniciada correctamente.")
+    return redirect("receiving:receipt_detail", receipt_id=recepcion.id)
+
+
+@login_required
+def receipt_scan(request, receipt_id):
+    recepcion = get_object_or_404(Receipt, id=receipt_id)
+    detalles = recepcion.detalles.select_related("producto").order_by("id")
+
+    detalle_encontrado = None
+
+    if request.method == "POST":
+        form = ReceiptScanForm(request.POST)
+        if form.is_valid():
+            codigo = form.cleaned_data["codigo"].strip()
+            cantidad = form.cleaned_data["cantidad"]
+            merma = form.cleaned_data.get("merma") or 0
+            sobrante = form.cleaned_data.get("sobrante") or 0
+            observacion = form.cleaned_data.get("observacion", "").strip()
+
+            producto = Product.objects.filter(codigo_barra=codigo).first()
+            if not producto:
+                producto = Product.objects.filter(sku=codigo).first()
+
+            if producto:
+                detalle_encontrado = recepcion.detalles.filter(
+                    producto=producto
+                ).first()
+
+                if not detalle_encontrado:
+                    detalle_encontrado = recepcion.detalles.filter(
+                        codigo_barra=codigo
+                    ).first()
+
+            else:
+                detalle_encontrado = recepcion.detalles.filter(
+                    codigo_barra=codigo
+                ).first()
+
+            if detalle_encontrado:
+                detalle_encontrado.cantidad_recibida += cantidad
+                detalle_encontrado.incidencia_merma += merma
+                detalle_encontrado.incidencia_sobrante += sobrante
+
+                faltante = (
+                    detalle_encontrado.cantidad_esperada
+                    - detalle_encontrado.cantidad_recibida
+                )
+                detalle_encontrado.incidencia_faltante = max(faltante, 0)
+
+                if detalle_encontrado.cantidad_recibida >= detalle_encontrado.cantidad_esperada:
+                    detalle_encontrado.recepcionado = True
+
+                if observacion:
+                    detalle_encontrado.observacion = observacion
+
+                detalle_encontrado.save(update_fields=[
+                    "cantidad_recibida",
+                    "incidencia_merma",
+                    "incidencia_sobrante",
+                    "incidencia_faltante",
+                    "recepcionado",
+                    "observacion",
+                ])
+
+                messages.success(
+                    request,
+                    f"Recepción registrada para {detalle_encontrado.nombre or detalle_encontrado.producto.nombre}."
+                )
+            else:
+                messages.error(
+                    request,
+                    "Código no reconocido en catálogo ni en esta recepción."
+                )
+    else:
+        form = ReceiptScanForm()
+
+    return render(request, "receiving/receipt_scan.html", {
+        "recepcion": recepcion,
+        "form": form,
+        "detalles": detalles,
+        "detalle_encontrado": detalle_encontrado,
+    })
+
+
+@login_required
+def receipt_finish(request, receipt_id):
+    recepcion = get_object_or_404(Receipt, id=receipt_id)
+
+    if recepcion.estado != Receipt.Status.EN_RECEPCION:
+        messages.warning(request, "La recepción no está en proceso.")
+        return redirect("receiving:receipt_detail", receipt_id=receipt_id)
+
+    recepcion.estado = Receipt.Status.PENDIENTE_APROBACION
+    recepcion.save(update_fields=["estado"])
+
+    messages.success(
+        request,
+        "Recepción finalizada y enviada a aprobación."
+    )
+
+    return redirect("receiving:receipt_detail", receipt_id=receipt_id)

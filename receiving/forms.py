@@ -35,3 +35,32 @@ class ReceiptImportForm(forms.Form):
             raise forms.ValidationError("Debes subir un archivo .xlsx")
 
         return archivo
+
+
+class ReceiptScanForm(forms.Form):
+    codigo = forms.CharField(label="Código escaneado", max_length=100)
+
+    cantidad = forms.IntegerField(
+        min_value=1,
+        initial=1,
+        label="Cantidad recibida"
+    )
+
+    merma = forms.IntegerField(
+        required=False,
+        initial=0,
+        min_value=0,
+        label="Merma"
+    )
+
+    sobrante = forms.IntegerField(
+        required=False,
+        initial=0,
+        min_value=0,
+        label="Sobrante"
+    )
+
+    observacion = forms.CharField(
+        required=False,
+        widget=forms.Textarea(attrs={"rows": 2})
+    )

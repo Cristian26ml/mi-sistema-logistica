@@ -2,6 +2,8 @@ from django.conf import settings
 from django.db import models
 from catalog.models import Product
 
+producto = models.ForeignKey(Product, on_delete=models.PROTECT)
+
 
 class Receipt(models.Model):
     class Status(models.TextChoices):
@@ -31,11 +33,30 @@ class Receipt(models.Model):
 
 class ReceiptDetail(models.Model):
     recepcion = models.ForeignKey(
-        Receipt, on_delete=models.CASCADE, related_name="detalles")
-    producto = models.ForeignKey(Product, on_delete=models.PROTECT)
+        Receipt,
+        on_delete=models.CASCADE,
+        related_name="detalles"
+    )
+    producto = models.ForeignKey(
+        Product,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True
+    )
+
+    sku = models.CharField(max_length=40, blank=True)
+    codigo_barra = models.CharField(max_length=50, blank=True)
+    nombre = models.CharField(max_length=150, blank=True)
+
     cantidad_esperada = models.PositiveIntegerField()
     cantidad_recibida = models.PositiveIntegerField(default=0)
+
+    incidencia_faltante = models.PositiveIntegerField(default=0)
+    incidencia_merma = models.PositiveIntegerField(default=0)
+    incidencia_sobrante = models.PositiveIntegerField(default=0)
+
     observacion = models.TextField(blank=True)
+    recepcionado = models.BooleanField(default=False)
 
     def __str__(self):
-        return f"{self.recepcion.numero_documento} - {self.producto.sku}"
+        return f"{self.recepcion.numero_documento} - {self.nombre}"

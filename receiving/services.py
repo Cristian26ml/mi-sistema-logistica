@@ -14,6 +14,13 @@ def normalizar_texto(valor):
     return str(valor).strip()
 
 
+def buscar_columna(encabezados, aliases):
+    for alias in aliases:
+        if alias in encabezados:
+            return encabezados.index(alias)
+    return None
+
+
 @transaction.atomic
 def importar_recepcion_desde_excel(*, archivo, proveedor, numero_documento, fecha_documento, usuario):
     try:
@@ -22,16 +29,45 @@ def importar_recepcion_desde_excel(*, archivo, proveedor, numero_documento, fech
     except Exception as e:
         raise ReceiptImportError(f"No fue posible leer el archivo Excel: {e}")
 
-    encabezados = [normalizar_texto(cell.value).lower() for cell in ws[1]]
+    header_row = None
+    encabezados = None
 
-    columnas_esperadas = ["sku", "codigo_barra", "nombre", "cantidad"]
-    faltantes = [col for col in columnas_esperadas if col not in encabezados]
+    for i, row in enumerate(ws.iter_rows(values_only=True), start=1):
+        row_values = [normalizar_texto(v).lower() for v in row]
+
+        if "codigo_barra" in row_values and "nombre" in row_values:
+            header_row = i
+            encabezados = row_values
+            break
+
+    if not header_row or not encabezados:
+        raise ReceiptImportError(
+            "No se encontraron encabezados válidos en el archivo Excel.")
+
+    idx_sku = buscar_columna(encabezados, ["sku"])
+    idx_codigo_barra = buscar_columna(
+        encabezados, ["codigo_barra", "código_barra", "codigo barra"])
+    idx_nombre = buscar_columna(
+        encabezados, ["nombre", "descripcion", "descripción", "producto"])
+    idx_cantidad = buscar_columna(
+        encabezados, ["cantidad", "cant.", "cant", "qty"])
+
+    faltantes = []
+    if idx_sku is None:
+        faltantes.append("sku")
+    if idx_codigo_barra is None:
+        faltantes.append("codigo_barra")
+    if idx_nombre is None:
+        faltantes.append("nombre")
+    if idx_cantidad is None:
+        faltantes.append("cantidad")
+
     if faltantes:
         raise ReceiptImportError(
             f"Faltan columnas obligatorias en el Excel: {', '.join(faltantes)}"
         )
 
-    idx = {nombre: encabezados.index(nombre) for nombre in columnas_esperadas}
+    archivo.seek(0)
 
     recepcion = Receipt.objects.create(
         proveedor=proveedor,
@@ -45,13 +81,19 @@ def importar_recepcion_desde_excel(*, archivo, proveedor, numero_documento, fech
     filas_importadas = 0
     errores = []
 
-    for nro_fila, row in enumerate(ws.iter_rows(min_row=2), start=2):
-        sku = normalizar_texto(row[idx["sku"]].value)
-        codigo_barra = normalizar_texto(row[idx["codigo_barra"]].value)
-        nombre = normalizar_texto(row[idx["nombre"]].value)
-        cantidad_valor = row[idx["cantidad"]].value
+    for nro_fila, row in enumerate(ws.iter_rows(min_row=header_row + 1), start=header_row + 1):
+        valores = [cell.value for cell in row]
 
-        if not sku and not codigo_barra:
+        sku = normalizar_texto(
+            valores[idx_sku]) if idx_sku < len(valores) else ""
+        codigo_barra = normalizar_texto(
+            valores[idx_codigo_barra]) if idx_codigo_barra < len(valores) else ""
+        nombre = normalizar_texto(
+            valores[idx_nombre]) if idx_nombre < len(valores) else ""
+        cantidad_valor = valores[idx_cantidad] if idx_cantidad < len(
+            valores) else None
+
+        if not sku and not codigo_barra and not nombre:
             continue
 
         try:
@@ -71,24 +113,25 @@ def importar_recepcion_desde_excel(*, archivo, proveedor, numero_documento, fech
         if not producto and sku:
             producto = Product.objects.filter(sku=sku).first()
 
-        if not producto:
-            errores.append(
-                f"Fila {nro_fila}: no se encontró producto para SKU '{sku}' o código '{codigo_barra}'."
-            )
-            continue
-
         ReceiptDetail.objects.create(
             recepcion=recepcion,
             producto=producto,
+            sku=sku,
+            codigo_barra=codigo_barra,
+            nombre=nombre,
             cantidad_esperada=cantidad,
             cantidad_recibida=0,
-            observacion=nombre
+            observacion=""
         )
         filas_importadas += 1
 
+        if not producto:
+            errores.append(
+                f"Fila {nro_fila}: producto no existe en catálogo. Se importó como pendiente de revisión."
+            )
+
     if filas_importadas == 0:
         raise ReceiptImportError(
-            "No se importó ninguna fila válida. Revisa el archivo."
-        )
+            "No se importó ninguna fila válida. Revisa el archivo.")
 
     return recepcion, filas_importadas, errores

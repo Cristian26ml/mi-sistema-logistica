@@ -10,6 +10,11 @@ from .forms import ReceiptScanForm
 from .models import ReceiptDetail
 from catalog.models import Product
 
+from .services import (
+    aprobar_recepcion,
+    ReceiptApprovalError,
+)
+
 
 @login_required
 def receipt_list(request):
@@ -221,5 +226,24 @@ def receipt_finish(request, receipt_id):
         request,
         "Recepción finalizada y enviada a aprobación."
     )
+
+    return redirect("receiving:receipt_detail", receipt_id=receipt_id)
+
+
+@login_required
+def receipt_approve(request, receipt_id):
+    recepcion = get_object_or_404(Receipt, id=receipt_id)
+
+    if request.method != "POST":
+        return redirect("receiving:receipt_detail", receipt_id=receipt_id)
+
+    try:
+        aprobar_recepcion(
+            recepcion=recepcion,
+            usuario=request.user,
+        )
+        messages.success(request, "Recepción aprobada correctamente.")
+    except ReceiptApprovalError as e:
+        messages.error(request, str(e))
 
     return redirect("receiving:receipt_detail", receipt_id=receipt_id)

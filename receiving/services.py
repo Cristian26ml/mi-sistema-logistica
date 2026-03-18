@@ -1,10 +1,16 @@
 from openpyxl import load_workbook
 from django.db import transaction
-from catalog.models import Product
+from catalog.models import Product, Category
 from .models import Receipt, ReceiptDetail
+from inventory.models import Movement
+from warehouse.models import Location
 
 
 class ReceiptImportError(Exception):
+    pass
+
+
+class ReceiptApprovalError(Exception):
     pass
 
 
@@ -135,3 +141,73 @@ def importar_recepcion_desde_excel(*, archivo, proveedor, numero_documento, fech
             "No se importó ninguna fila válida. Revisa el archivo.")
 
     return recepcion, filas_importadas, errores
+
+
+@transaction.atomic
+def aprobar_recepcion(*, recepcion, usuario):
+    if recepcion.estado != Receipt.Status.PENDIENTE_APROBACION:
+        raise ReceiptApprovalError(
+            "Solo se puede aprobar una recepción en estado Pendiente de aprobación."
+        )
+
+    detalles = recepcion.detalles.select_related("producto").all()
+
+    if not detalles.exists():
+        raise ReceiptApprovalError(
+            "La recepción no tiene líneas para aprobar.")
+
+    categoria_default, _ = Category.objects.get_or_create(
+        nombre="Sin categoría")
+
+    # ubicación temporal de entrada
+    ubicacion_entrada, _ = Location.objects.get_or_create(
+        codigo="RECEPCION",
+        defaults={"descripcion": "Zona temporal de recepción"}
+    )
+
+    for detalle in detalles:
+        cantidad_aprobada = detalle.cantidad_recibida
+
+        if cantidad_aprobada <= 0:
+            continue
+
+        producto = detalle.producto
+
+        if not producto:
+            if not detalle.sku:
+                raise ReceiptApprovalError(
+                    f"No se puede crear producto para la línea '{detalle.nombre}' porque no tiene SKU."
+                )
+
+            if not detalle.codigo_barra:
+                raise ReceiptApprovalError(
+                    f"No se puede crear producto para la línea '{detalle.nombre}' porque no tiene código de barra."
+                )
+
+            producto = Product.objects.create(
+                codigo_barra=detalle.codigo_barra,
+                sku=detalle.sku,
+                nombre=detalle.nombre or "Producto sin nombre",
+                categoria=categoria_default,
+                stock_minimo=0,
+                stock_actual=0,
+            )
+
+            detalle.producto = producto
+            detalle.save(update_fields=["producto"])
+
+        producto.stock_actual += cantidad_aprobada
+        producto.save(update_fields=["stock_actual"])
+
+        Movement.objects.create(
+            producto=producto,
+            ubicacion=ubicacion_entrada,
+            tipo=Movement.Types.ENTRADA,
+            cantidad=cantidad_aprobada,
+            usuario=usuario,
+        )
+
+    recepcion.estado = Receipt.Status.APROBADA
+    recepcion.save(update_fields=["estado"])
+
+    return recepcion

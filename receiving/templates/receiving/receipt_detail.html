@@ -11,10 +11,37 @@
         Volver
     </a>
 
+    {% if recepcion.estado == "BORRADOR" %}
+    <form method="post" action="{% url 'receiving:receipt_start' recepcion.id %}" style="display:inline;">
+        {% csrf_token %}
+        <button class="btn" type="submit">Iniciar recepción</button>
+    </form>
+    {% endif %}
+
+    {% if recepcion.estado == "EN_RECEPCION" %}
     <a class="btn" href="{% url 'receiving:receipt_scan' recepcion.id %}">
         Recepcionar productos
     </a>
+    {% endif %}
+
+    {% if recepcion.estado == "PENDIENTE_APROBACION" %}
+    <form method="post" action="{% url 'receiving:receipt_approve' recepcion.id %}" style="display:inline;">
+        {% csrf_token %}
+        <button class="btn" type="submit">Aprobar recepción</button>
+    </form>
+    {% endif %}
 </div>
+<!--<div style="margin-bottom: 16px; display:flex; gap:10px; flex-wrap:wrap;">
+    <a class="btn"
+        style="text-decoration:none; padding:10px 12px; display:inline-block;"
+        href="{% url 'receiving:receipt_list' %}">
+        Volver
+    </a>
+
+    <a class="btn" href="{% url 'receiving:receipt_scan' recepcion.id %}">
+        Recepcionar productos
+    </a>
+</div>-->
 
 <div style="border:1px solid #ddd; padding:16px; margin-bottom:18px; border-radius:8px;">
     <h4 style="margin-top:0;">Información general</h4>

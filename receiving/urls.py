@@ -12,4 +12,6 @@ urlpatterns = [
     path("<int:receipt_id>/scan/", views.receipt_scan, name="receipt_scan"),
     path("<int:receipt_id>/finalizar/",
          views.receipt_finish, name="receipt_finish"),
+    path("<int:receipt_id>/approve/",
+         views.receipt_approve, name="receipt_approve"),
 ]

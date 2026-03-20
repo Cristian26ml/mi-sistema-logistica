@@ -11,4 +11,5 @@ urlpatterns = [
     path("mis-pickings/", views.mis_pickings, name="mis_pickings"),
     path("confirmar/<int:detalle_id>/",
          views.confirmar_picking, name="confirmar_picking"),
+    # path("nueva/<str:factura_id>/", views.orden_crear, name="orden_crear"),
 ]

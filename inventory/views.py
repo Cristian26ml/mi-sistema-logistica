@@ -24,7 +24,8 @@ def dashboard(request):
     ).count()
     movimientos_hoy = Movement.objects.filter(fecha__date=hoy).count()
     pickings_pendientes = PickingDetail.objects.filter(
-        confirmado=False).count()
+        estado="PENDIENTE"
+    ).count()
 
     ultimos_movimientos = Movement.objects.select_related(
         "producto", "ubicacion", "usuario"

@@ -27,6 +27,15 @@ class Receipt(models.Model):
     )
     fecha_creacion = models.DateTimeField(auto_now_add=True)
 
+    aprobado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="recepciones_aprobadas"
+    )
+    fecha_aprobacion = models.DateTimeField(null=True, blank=True)
+
     def __str__(self):
         return f"{self.numero_documento} - {self.proveedor}"
 

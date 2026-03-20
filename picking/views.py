@@ -19,12 +19,18 @@ def ordenes_list(request):
 
 @roles_permitidos("ADMIN", "SUPERVISOR")
 def orden_crear(request):
-    orden = PickingOrder.objects.create(
-        supervisor=request.user,
-        estado=PickingOrder.Status.CREADA
-    )
-    messages.success(request, f"Orden #{orden.id} creada.")
-    return redirect("picking:orden_detalle", orden_id=orden.id)
+    if request.method == "POST":
+        factura_id = request.POST.get("factura")  # puede venir vacío
+        orden = PickingOrder.objects.create(
+            supervisor=request.user,
+            factura=factura_id,  # si está vacío, el modelo genera uno automático
+            estado=PickingOrder.Status.CREADA
+        )
+        messages.success(
+            request, f"Orden N°{orden.numero_orden} creada para guía {orden.factura}.")
+        return redirect("picking:orden_detalle", orden_id=orden.id)
+
+    return render(request, "picking/orden_crear.html")
 
 
 @roles_permitidos("ADMIN", "SUPERVISOR")
@@ -59,7 +65,7 @@ def orden_detalle(request, orden_id):
 def mis_pickings(request):
     detalles = PickingDetail.objects.select_related(
         "producto", "ubicacion", "orden"
-    ).filter(operario=request.user, confirmado=False)
+    ).filter(operario=request.user, estado="PENDIENTE")
 
     return render(request, "picking/mis_pickings.html", {
         "detalles": detalles

@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block content %}
+<h3>Nueva Orden de Picking</h3>
+<form method="post">
+    {% csrf_token %}
+    <label>Código de guía</label>
+    <input type="text" name="factura" required>
+    <button class="btn">Crear Orden</button>
+</form>
+{% endblock %}

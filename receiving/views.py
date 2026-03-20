@@ -16,6 +16,14 @@ from .services import (
 )
 
 
+def usuario_es_administrador(usuario):
+    return usuario.is_superuser or getattr(usuario, "rol", "") == "ADMINISTRADOR"
+
+
+def usuario_puede_recepcionar(usuario):
+    return usuario.is_superuser or getattr(usuario, "rol", "") in ["ADMINISTRADOR", "SUPERVISOR", "OPERARIO"]
+
+
 @login_required
 def receipt_list(request):
     recepciones = Receipt.objects.all().order_by("-fecha_creacion")
@@ -85,7 +93,7 @@ def receipt_import(request):
 @login_required
 def receipt_detail(request, receipt_id):
     recepcion = get_object_or_404(
-        Receipt.objects.select_related("creado_por"),
+        Receipt.objects.select_related("creado_por", "aprobado_por"),
         id=receipt_id
     )
     detalles = recepcion.detalles.select_related(
@@ -94,11 +102,16 @@ def receipt_detail(request, receipt_id):
     total_lineas = detalles.count()
     total_unidades = sum(d.cantidad_esperada for d in detalles)
 
+    es_administrador = usuario_es_administrador(request.user)
+    puede_recepcionar = usuario_puede_recepcionar(request.user)
+
     return render(request, "receiving/receipt_detail.html", {
         "recepcion": recepcion,
         "detalles": detalles,
         "total_lineas": total_lineas,
         "total_unidades": total_unidades,
+        "es_administrador": es_administrador,
+        "puede_recepcionar": puede_recepcionar,
     })
 
 
@@ -107,6 +120,10 @@ def receipt_start(request, receipt_id):
     recepcion = get_object_or_404(Receipt, id=receipt_id)
 
     if request.method != "POST":
+        return redirect("receiving:receipt_detail", receipt_id=recepcion.id)
+
+    if not usuario_puede_recepcionar(request.user):
+        messages.error(request, "No tienes permiso para iniciar la recepción.")
         return redirect("receiving:receipt_detail", receipt_id=recepcion.id)
 
     if recepcion.estado != Receipt.Status.BORRADOR:
@@ -133,8 +150,17 @@ def receipt_start(request, receipt_id):
 @login_required
 def receipt_scan(request, receipt_id):
     recepcion = get_object_or_404(Receipt, id=receipt_id)
-    detalles = recepcion.detalles.select_related("producto").order_by("id")
 
+    if not usuario_puede_recepcionar(request.user):
+        messages.error(
+            request, "No tienes permiso para recepcionar productos.")
+        return redirect("receiving:receipt_detail", receipt_id=recepcion.id)
+
+    if recepcion.estado != Receipt.Status.EN_RECEPCION:
+        messages.warning(request, "La recepción no está en proceso.")
+        return redirect("receiving:receipt_detail", receipt_id=recepcion.id)
+
+    detalles = recepcion.detalles.select_related("producto").order_by("id")
     detalle_encontrado = None
 
     if request.method == "POST":
@@ -152,18 +178,14 @@ def receipt_scan(request, receipt_id):
 
             if producto:
                 detalle_encontrado = recepcion.detalles.filter(
-                    producto=producto
-                ).first()
+                    producto=producto).first()
 
                 if not detalle_encontrado:
                     detalle_encontrado = recepcion.detalles.filter(
-                        codigo_barra=codigo
-                    ).first()
-
+                        codigo_barra=codigo).first()
             else:
                 detalle_encontrado = recepcion.detalles.filter(
-                    codigo_barra=codigo
-                ).first()
+                    codigo_barra=codigo).first()
 
             if detalle_encontrado:
                 detalle_encontrado.cantidad_recibida += cantidad
@@ -215,6 +237,14 @@ def receipt_scan(request, receipt_id):
 def receipt_finish(request, receipt_id):
     recepcion = get_object_or_404(Receipt, id=receipt_id)
 
+    if request.method != "POST":
+        return redirect("receiving:receipt_detail", receipt_id=receipt_id)
+
+    if not usuario_puede_recepcionar(request.user):
+        messages.error(
+            request, "No tienes permiso para finalizar la recepción.")
+        return redirect("receiving:receipt_detail", receipt_id=receipt_id)
+
     if recepcion.estado != Receipt.Status.EN_RECEPCION:
         messages.warning(request, "La recepción no está en proceso.")
         return redirect("receiving:receipt_detail", receipt_id=receipt_id)
@@ -235,6 +265,11 @@ def receipt_approve(request, receipt_id):
     recepcion = get_object_or_404(Receipt, id=receipt_id)
 
     if request.method != "POST":
+        return redirect("receiving:receipt_detail", receipt_id=receipt_id)
+
+    if not usuario_es_administrador(request.user):
+        messages.error(
+            request, "Solo el Administrador puede aprobar la recepción.")
         return redirect("receiving:receipt_detail", receipt_id=receipt_id)
 
     try:

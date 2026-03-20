@@ -11,20 +11,25 @@
         Volver
     </a>
 
-    {% if recepcion.estado == "BORRADOR" %}
+    {% if recepcion.estado == "BORRADOR" and puede_recepcionar %}
     <form method="post" action="{% url 'receiving:receipt_start' recepcion.id %}" style="display:inline;">
         {% csrf_token %}
         <button class="btn" type="submit">Iniciar recepción</button>
     </form>
     {% endif %}
 
-    {% if recepcion.estado == "EN_RECEPCION" %}
+    {% if recepcion.estado == "EN_RECEPCION" and puede_recepcionar %}
     <a class="btn" href="{% url 'receiving:receipt_scan' recepcion.id %}">
         Recepcionar productos
     </a>
+
+    <form method="post" action="{% url 'receiving:receipt_finish' recepcion.id %}" style="display:inline;">
+        {% csrf_token %}
+        <button class="btn" type="submit">Finalizar recepción</button>
+    </form>
     {% endif %}
 
-    {% if recepcion.estado == "PENDIENTE_APROBACION" %}
+    {% if recepcion.estado == "PENDIENTE_APROBACION" and es_administrador %}
     <form method="post" action="{% url 'receiving:receipt_approve' recepcion.id %}" style="display:inline;">
         {% csrf_token %}
         <button class="btn" type="submit">Aprobar recepción</button>

@@ -34,14 +34,17 @@
             {% if user.rol == "ADMIN" or user.rol == "SUPERVISOR" %}
                 <a class="btn" href="{% url 'catalog:productos_list' %}">Productos</a>
                 <a class="btn" href="{% url 'catalog:producto_crear' %}">Agregar producto</a>
-                <a class="btn" href="{% url 'receiving:receipt_list' %}">Recepciones</a>
-                <a class="btn" href="{% url 'inventory:movimientos_list' %}">Movimientos</a>
                 <a class="btn" href="{% url 'warehouse:ubicaciones_list' %}">Ubicaciones</a>
                 <a class="btn" href="{% url 'warehouse:asignaciones_list' %}">Asignaciones</a>
                 <a class="btn" href="{% url 'picking:ordenes_list' %}">Picking</a>
             {% endif %}
 
+            {% if user.rol == "SUPERVISOR" or user.rol == "OPERARIO" %}
+                <a class="btn" href="{% url 'inventory:movimientos_list' %}">Movimientos</a>
+            {% endif %}
+
             {% if user.rol == "ADMIN" or user.rol == "SUPERVISOR" or user.rol == "OPERARIO" %}
+                <a class="btn" href="{% url 'receiving:receipt_list' %}">Recepciones</a>
                 <a class="btn" href="{% url 'inventory:movimiento_crear' %}">Registrar movimiento</a>
                 <a class="btn" href="{% url 'warehouse:consulta_ubicacion' %}">Consulta SKU</a>
                 <a class="btn" href="{% url 'picking:mis_pickings' %}">Mis Pickings</a>

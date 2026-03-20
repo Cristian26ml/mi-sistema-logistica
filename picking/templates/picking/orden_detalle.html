@@ -2,81 +2,40 @@
 
 {% block content %}
 
-    <h3>Orden #{{ orden.id }}</h3>
-
-    <h4>Agregar producto</h4>
-
-    <p><strong>Estado:</strong> {{ orden.get_estado_display }}</p>
-
-    {% if form.errors %}
-        <div class="msg error">
-            {{ form.errors }}
-        </div>
-    {% endif %}
+    <h3>Factura #{{ orden.factura }} - Orden N°{{ orden.numero_orden }}</h3>
+    <p><strong>Estado de la orden:</strong> {{ orden.get_estado_display }}</p>
 
     <form method="post">
         {% csrf_token %}
-
         <div class="row">
-
-            <div>
-                <label>Producto</label>
-                {{ form.producto }}
-            </div>
-
-            <div>
-                <label>Cantidad</label>
-                {{ form.cantidad }}
-            </div>
-
-            <div>
-                <label>Ubicación</label>
-                {{ form.ubicacion }}
-            </div>
-
-            <div>
-                <label>Operario</label>
-                {{ form.operario }}
-            </div>
-
+            <div><label>Producto</label>{{ form.producto }}</div>
+            <div><label>Cantidad</label>{{ form.cantidad }}</div>
+            <div><label>Ubicación</label>{{ form.ubicacion }}</div>
+            <div><label>Operario</label>{{ form.operario }}</div>
+            <div><label>Estado inicial</label>{{ form.estado }}</div>
+            <div><label>Prioridad</label>{{ form.prioridad }}</div>
         </div>
-
         <button class="btn">Agregar</button>
-
     </form>
 
     <hr>
-
     <h4>Productos en la orden</h4>
-
-    <table style="width:100%">
-
+    <table>
         <tr>
-            <th>Producto</th>
-            <th>Cantidad</th>
-            <th>Ubicación</th>
-            <th>Operario</th>
-            <th>Estado</th>
+            <th>Producto</th><th>Cantidad</th><th>Ubicación</th>
+            <th>Operario</th><th>Estado</th><th>Prioridad</th>
         </tr>
-
         {% for d in detalles %}
-
         <tr>
             <td>{{ d.producto }}</td>
             <td>{{ d.cantidad }}</td>
             <td>{{ d.ubicacion }}</td>
             <td>{{ d.operario }}</td>
-            <td>
-                {% if d.confirmado %}
-                ✔
-                {% else %}
-                Pendiente
-                {% endif %}
-            </td>
+            <td>{{ d.get_estado_display }}</td>
+            <td>{{ d.prioridad }}</td>
         </tr>
-
         {% endfor %}
-
     </table>
+
 
 {% endblock %}

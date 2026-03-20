@@ -30,20 +30,6 @@ def asignaciones_list(request):
     return render(request, "warehouse/asignaciones_list.html", {"asignaciones": asignaciones})
 
 
-# @roles_permitidos("ADMIN", "SUPERVISOR")
-# def ubicacion_crear(request):
-#    if request.method == "POST":
-#        form = LocationForm(request.POST)
-#        if form.is_valid():
-#            form.save()
-#            messages.success(request, "Ubicación creada correctamente.")
-#            return redirect("warehouse:ubicaciones_list")
-#    else:
-#        form = LocationForm()
-#
-#    return render(request, "warehouse/ubicacion_form.html", {"form": form})
-
-
 @roles_permitidos("ADMIN", "SUPERVISOR")
 def ubicacion_generar(request):
     if not puede_gestionar_ubicaciones(request.user):

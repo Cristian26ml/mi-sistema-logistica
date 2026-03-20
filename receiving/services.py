@@ -2,6 +2,7 @@ from openpyxl import load_workbook
 from django.db import transaction
 from catalog.models import Product, Category
 from .models import Receipt, ReceiptDetail
+from django.utils import timezone
 from inventory.models import Movement
 from warehouse.models import Location
 
@@ -25,6 +26,10 @@ def buscar_columna(encabezados, aliases):
         if alias in encabezados:
             return encabezados.index(alias)
     return None
+
+
+def usuario_es_administrador(usuario):
+    return usuario.is_superuser or getattr(usuario, "rol", "") == "ADMINISTRADOR"
 
 
 @transaction.atomic
@@ -145,6 +150,11 @@ def importar_recepcion_desde_excel(*, archivo, proveedor, numero_documento, fech
 
 @transaction.atomic
 def aprobar_recepcion(*, recepcion, usuario):
+    if not usuario_es_administrador(usuario):
+        raise ReceiptApprovalError(
+            "Solo el Administrador puede aprobar la recepción."
+        )
+
     if recepcion.estado != Receipt.Status.PENDIENTE_APROBACION:
         raise ReceiptApprovalError(
             "Solo se puede aprobar una recepción en estado Pendiente de aprobación."
@@ -154,16 +164,19 @@ def aprobar_recepcion(*, recepcion, usuario):
 
     if not detalles.exists():
         raise ReceiptApprovalError(
-            "La recepción no tiene líneas para aprobar.")
+            "La recepción no tiene líneas para aprobar."
+        )
 
     categoria_default, _ = Category.objects.get_or_create(
-        nombre="Sin categoría")
-
-    # ubicación temporal de entrada
-    ubicacion_entrada, _ = Location.objects.get_or_create(
-        codigo="RECEPCION",
-        defaults={"descripcion": "Zona temporal de recepción"}
+        nombre="Sin categoría"
     )
+
+    ubicacion_virtual, _ = Location.objects.get_or_create(
+        codigo="ALMACEN_VIRTUAL",
+        defaults={"descripcion": "Ubicación virtual de almacenamiento"}
+    )
+
+    hubo_productos_aprobados = False
 
     for detalle in detalles:
         cantidad_aprobada = detalle.cantidad_recibida
@@ -201,13 +214,23 @@ def aprobar_recepcion(*, recepcion, usuario):
 
         Movement.objects.create(
             producto=producto,
-            ubicacion=ubicacion_entrada,
+            ubicacion=ubicacion_virtual,
             tipo=Movement.Types.ENTRADA,
             cantidad=cantidad_aprobada,
             usuario=usuario,
         )
 
+        hubo_productos_aprobados = True
+
+    if not hubo_productos_aprobados:
+        raise ReceiptApprovalError(
+            "No hay cantidades recibidas para aprobar."
+        )
+
     recepcion.estado = Receipt.Status.APROBADA
-    recepcion.save(update_fields=["estado"])
+    recepcion.aprobado_por = usuario
+    recepcion.fecha_aprobacion = timezone.now()
+    recepcion.save(
+        update_fields=["estado", "aprobado_por", "fecha_aprobacion"])
 
     return recepcion

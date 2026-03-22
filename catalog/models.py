@@ -8,27 +8,6 @@ class Category(models.Model):
         return str(self.nombre)
 
 
-# def calcular_digito_verificador_ean13(base12: str) -> str:
-#    if len(base12) != 12 or not base12.isdigit():
-#        raise ValueError(
-#            "La base del EAN-13 debe tener exactamente 12 dígitos")
-
-#    suma = 0
-#    for i, digito in enumerate(base12):
-#        n = int(digito)
-#        if i % 2 == 0:
-#            suma += n
-#        else:
-#            suma += n * 3
-
-#    digito_verificador = (10 - (suma % 10)) % 10
-#    return str(digito_verificador)
-
-
-# def generar_ean13_desde_base(base12: str) -> str:
-#    return base12 + calcular_digito_verificador_ean13(base12)
-
-
 class Product(models.Model):
     codigo_barra = models.CharField(max_length=50, unique=True)
     codigo_interno = models.CharField(max_length=13, unique=True, blank=True)
@@ -40,13 +19,23 @@ class Product(models.Model):
     )
     stock_minimo = models.PositiveIntegerField(default=0)
     stock_actual = models.IntegerField(default=0)
+    estado = models.CharField(
+        max_length=20,
+        choices=[("OK", "OK"), ("ALERTA", "ALERTA")],
+        default="OK"
+    )
 
     def save(self, *args, **kwargs):
+        # Actualizar estado antes de guardar
+        if self.stock_actual <= self.stock_minimo:
+            self.estado = "ALERTA"
+        else:
+            self.estado = "OK"
+
         creando = self.pk is None
         super().save(*args, **kwargs)
 
         updates = {}
-
         if creando and not self.codigo_interno:
             updates["codigo_interno"] = f"INT-{self.id:06d}"
 

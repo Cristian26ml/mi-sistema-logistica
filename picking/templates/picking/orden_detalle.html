@@ -36,6 +36,24 @@
         </tr>
         {% endfor %}
     </table>
+    <script>
+    document.getElementById("id_producto").addEventListener("change", function() {
+        var productoId = this.value;
+        if (!productoId) return;
 
+        fetch("{% url 'picking:ubicaciones_por_producto' 0 %}".replace("0", productoId))
+            .then(response => response.json())
+            .then(data => {
+                var select = document.getElementById("id_ubicacion");
+                select.innerHTML = "";
+                data.forEach(function(item) {
+                    var option = document.createElement("option");
+                    option.value = item.id;
+                    option.text = item.codigo + " (Stock: " + item.stock + ")";
+                    select.add(option);
+                });
+            });
+    });
+    </script>
 
 {% endblock %}

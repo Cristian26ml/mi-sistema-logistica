@@ -1,7 +1,7 @@
 from django.contrib import messages
 from django.shortcuts import render, redirect
 from django.http import HttpResponseForbidden
-
+from django.db.models import F
 from .models import Product, Category
 from .forms import ProductForm, CategoryForm
 from accounts.permissions import puede_gestionar_catalogo, puede_ver_productos
@@ -13,8 +13,12 @@ def productos_list(request):
 
     productos = Product.objects.select_related(
         "categoria").all().order_by("sku")
+    alerta_count = productos.filter(
+        stock_actual__lte=F("stock_minimo")).count()
+
     return render(request, "catalog/productos_list.html", {
         "productos": productos,
+        "alerta_count": alerta_count,
     })
 
 

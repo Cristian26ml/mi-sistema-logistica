@@ -6,7 +6,8 @@ from warehouse.models import ProductLocation, Location
 class PickingOrderForm(forms.ModelForm):
     class Meta:
         model = PickingOrder
-        fields = []  # solo se crea la orden con el supervisor (request.user)
+        # solo se crea la orden con el supervisor (request.user)
+        fields = ["supervisor"]
 
 
 class PickingDetailForm(forms.ModelForm):

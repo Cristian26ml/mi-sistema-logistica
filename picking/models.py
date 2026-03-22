@@ -1,4 +1,4 @@
-import uuid
+import random
 from django.conf import settings
 from django.db import models
 from catalog.models import Product
@@ -12,9 +12,8 @@ class PickingOrder(models.Model):
         COMPLETADA = "COMPLETADA", "Completada"
         CANCELADA = "CANCELADA", "Cancelada"
 
-    # código de guía
-    factura = models.CharField(max_length=20, blank=True, default="SIN_GUIA")
-    numero_orden = models.PositiveIntegerField(default=1)
+    factura = models.CharField(max_length=20, unique=True, blank=True)
+    numero_orden = models.PositiveIntegerField(blank=True, null=True)
     fecha = models.DateTimeField(auto_now_add=True)
     supervisor = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -28,17 +27,20 @@ class PickingOrder(models.Model):
     )
 
     def save(self, *args, **kwargs):
-        # Si no se ingresó manualmente un código de guía, se genera automáticamente
+        # Generar código de guía si no existe
         if not self.factura:
-            # Ej: PK-3F9A2C
-            self.factura = f"PK-{uuid.uuid4().hex[:6].upper()}"
+            self.factura = f"{random.randint(10000, 99999)}"
 
-        # Numeración reiniciada por código de guía
+        # Generar número de orden secuencial
         if not self.numero_orden:
-            count = PickingOrder.objects.filter(factura=self.factura).count()
-            self.numero_orden = count + 1
+            last_order = PickingOrder.objects.order_by("-numero_orden").first()
+            self.numero_orden = (
+                last_order.numero_orden + 1) if last_order else 1
 
         super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.factura} - Orden #{self.numero_orden}"
 
 
 class PickingDetail(models.Model):

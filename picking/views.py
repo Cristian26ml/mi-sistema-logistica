@@ -1,3 +1,5 @@
+from django.http import JsonResponse
+from warehouse.models import ProductLocation
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
@@ -10,6 +12,20 @@ from inventory.services import registrar_movimiento, StockError
 from .services import actualizar_estado_orden
 
 
+def ubicaciones_por_producto(request, producto_id):
+    qs = ProductLocation.objects.filter(
+        producto_id=producto_id).select_related("ubicacion")
+    data = [
+        {
+            "id": pl.ubicacion.id,
+            "codigo": pl.ubicacion.codigo,
+            "stock": pl.cantidad
+        }
+        for pl in qs
+    ]
+    return JsonResponse(data, safe=False)
+
+
 @roles_permitidos("ADMIN", "SUPERVISOR")
 def ordenes_list(request):
     ordenes = PickingOrder.objects.select_related(
@@ -20,16 +36,10 @@ def ordenes_list(request):
 @roles_permitidos("ADMIN", "SUPERVISOR")
 def orden_crear(request):
     if request.method == "POST":
-        factura_id = request.POST.get("factura")  # puede venir vacío
-        orden = PickingOrder.objects.create(
-            supervisor=request.user,
-            factura=factura_id,  # si está vacío, el modelo genera uno automático
-            estado=PickingOrder.Status.CREADA
-        )
+        orden = PickingOrder.objects.create(supervisor=request.user)
         messages.success(
-            request, f"Orden N°{orden.numero_orden} creada para guía {orden.factura}.")
-        return redirect("picking:orden_detalle", orden_id=orden.id)
-
+            request, f"Orden {orden.factura} creada correctamente.")
+        return redirect("picking:orden_detalle", orden_id=orden.pk)
     return render(request, "picking/orden_crear.html")
 
 
@@ -76,7 +86,7 @@ def mis_pickings(request):
 def confirmar_picking(request, detalle_id):
     detalle = get_object_or_404(PickingDetail, id=detalle_id)
 
-    if detalle.confirmado:
+    if detalle.estado == "COMPLETADO":
         messages.warning(request, "Este picking ya fue confirmado.")
         return redirect("picking:mis_pickings")
 
@@ -94,9 +104,8 @@ def confirmar_picking(request, detalle_id):
             usuario=request.user,
         )
 
-        detalle.confirmado = True
-        detalle.confirmado_en = timezone.now()
-        detalle.save(update_fields=["confirmado", "confirmado_en"])
+        detalle.estado = "COMPLETADO"
+        detalle.save(update_fields=["estado"])
 
         actualizar_estado_orden(detalle.orden)
 

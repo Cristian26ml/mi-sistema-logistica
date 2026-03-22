@@ -5,3 +5,13 @@ openpyxl==3.1.5
 psycopg2==2.9.11
 sqlparse==0.5.5
 tzdata==2025.3
+
+#paso para clonar el proyecto
+#1. git clone
+#2. cd proyecto
+#3. python manage.py check
+#4. python env/Scripts/activate
+#5. pip install -r requirements.txt
+# Nota: si se pasa a otro computador, 
+# debe tener instalado PostgreSQL y crear la base de datos con el mismo nombre 
+#que se tiene en settings.py

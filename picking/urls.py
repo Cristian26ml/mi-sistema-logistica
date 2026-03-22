@@ -6,6 +6,7 @@ app_name = "picking"
 urlpatterns = [
     path("picking/", views.ordenes_list, name="ordenes_list"),
     path("picking/nueva/", views.orden_crear, name="orden_crear"),
+
     path("picking/<int:orden_id>/", views.orden_detalle, name="orden_detalle"),
 
     path("mis-pickings/", views.mis_pickings, name="mis_pickings"),

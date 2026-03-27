@@ -1,59 +1,121 @@
 {% extends "base.html" %}
 
+{% block title %}Detalle de Orden{% endblock %}
+
 {% block content %}
+<div class="container py-4">
 
-    <h3>Factura #{{ orden.factura }} - Orden N°{{ orden.numero_orden }}</h3>
-    <p><strong>Estado de la orden:</strong> {{ orden.get_estado_display }}</p>
+    <h3 class="mb-2">Factura #{{ orden.factura }} - Orden N°{{ orden.numero_orden }}</h3>
+    <p class="mb-4">
+        <strong>Estado de la orden:</strong>
+        <span class="badge bg-info text-dark">{{ orden.get_estado_display }}</span>
+    </p>
 
-    <form method="post">
-        {% csrf_token %}
-        <div class="row">
-            <div><label>Producto</label>{{ form.producto }}</div>
-            <div><label>Cantidad</label>{{ form.cantidad }}</div>
-            <div><label>Ubicación</label>{{ form.ubicacion }}</div>
-            <div><label>Operario</label>{{ form.operario }}</div>
-            <div><label>Estado inicial</label>{{ form.estado }}</div>
-            <div><label>Prioridad</label>{{ form.prioridad }}</div>
+    <div class="card bg-secondary text-light shadow border-0 mb-4">
+        <div class="card-body">
+            <h4 class="card-title mb-3">Agregar producto a la orden</h4>
+
+            <form method="post">
+                {% csrf_token %}
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="id_producto" class="form-label">Producto</label>
+                        {{ form.producto }}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="id_cantidad" class="form-label">Cantidad</label>
+                        {{ form.cantidad }}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="id_ubicacion" class="form-label">Ubicación</label>
+                        {{ form.ubicacion }}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="id_operario" class="form-label">Operario</label>
+                        {{ form.operario }}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="id_estado" class="form-label">Estado inicial</label>
+                        {{ form.estado }}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="id_prioridad" class="form-label">Prioridad</label>
+                        {{ form.prioridad }}
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <button class="btn btn-primary" type="submit">Agregar</button>
+                </div>
+            </form>
         </div>
-        <button class="btn">Agregar</button>
-    </form>
+    </div>
 
-    <hr>
-    <h4>Productos en la orden</h4>
-    <table>
-        <tr>
-            <th>Producto</th><th>Cantidad</th><th>Ubicación</th>
-            <th>Operario</th><th>Estado</th><th>Prioridad</th>
-        </tr>
-        {% for d in detalles %}
-        <tr>
-            <td>{{ d.producto }}</td>
-            <td>{{ d.cantidad }}</td>
-            <td>{{ d.ubicacion }}</td>
-            <td>{{ d.operario }}</td>
-            <td>{{ d.get_estado_display }}</td>
-            <td>{{ d.prioridad }}</td>
-        </tr>
-        {% endfor %}
-    </table>
-    <script>
-    document.getElementById("id_producto").addEventListener("change", function() {
-        var productoId = this.value;
-        if (!productoId) return;
+    <div class="card bg-secondary text-light shadow border-0">
+        <div class="card-body">
+            <h4 class="card-title mb-3">Productos en la orden</h4>
 
-        fetch("{% url 'picking:ubicaciones_por_producto' 0 %}".replace("0", productoId))
-            .then(response => response.json())
-            .then(data => {
-                var select = document.getElementById("id_ubicacion");
-                select.innerHTML = "";
-                data.forEach(function(item) {
-                    var option = document.createElement("option");
-                    option.value = item.id;
-                    option.text = item.codigo + " (Stock: " + item.stock + ")";
-                    select.add(option);
-                });
+            <div class="table-responsive">
+                <table class="table table-dark table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Cantidad</th>
+                            <th>Ubicación</th>
+                            <th>Operario</th>
+                            <th>Estado</th>
+                            <th>Prioridad</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for d in detalles %}
+                        <tr>
+                            <td>{{ d.producto }}</td>
+                            <td>{{ d.cantidad }}</td>
+                            <td>{{ d.ubicacion }}</td>
+                            <td>{{ d.operario }}</td>
+                            <td>{{ d.get_estado_display }}</td>
+                            <td>{{ d.prioridad }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center text-light-emphasis py-3">
+                                No hay productos agregados a esta orden.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+document.getElementById("id_producto").addEventListener("change", function() {
+    var productoId = this.value;
+    if (!productoId) return;
+
+    fetch("{% url 'picking:ubicaciones_por_producto' 0 %}".replace("0", productoId))
+        .then(response => response.json())
+        .then(data => {
+            var select = document.getElementById("id_ubicacion");
+            select.innerHTML = "";
+            data.forEach(function(item) {
+                var option = document.createElement("option");
+                option.value = item.id;
+                option.text = item.codigo + " (Stock: " + item.stock + ")";
+                select.add(option);
             });
-    });
-    </script>
+        });
+});
+</script>
 
 {% endblock %}

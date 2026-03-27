@@ -2,28 +2,49 @@
 {% block title %}Ubicaciones{% endblock %}
 
 {% block content %}
-    <div style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
-        <h3>Ubicaciones</h3>
-        <a class="btn" style="text-decoration:none; padding:10px 12px; display:inline-block;"
-            href="{% url 'warehouse:ubicacion_generar' %}">+ Nueva ubicación</a>
+<div class="container py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="mb-0">Ubicaciones</h3>
+
+        <a class="btn btn-primary" href="{% url 'warehouse:ubicacion_generar' %}">
+            + Nueva ubicación
+        </a>
     </div>
 
-    <table style="width:100%; border-collapse:collapse;">
-        <thead>
-            <tr>
-                <th style="text-align:left; padding:8px; border-bottom:1px solid #ddd;">Código</th>
-                <th style="text-align:left; padding:8px; border-bottom:1px solid #ddd;">Descripción</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for u in ubicaciones %}
-                <tr>
-                    <td style="padding:8px; border-bottom:1px solid #eee;">{{ u.codigo }}</td>
-                    <td style="padding:8px; border-bottom:1px solid #eee;">{{ u.descripcion }}</td>
-                </tr>
-            {% empty %}
-                <tr><td colspan="2" style="padding:10px;">No hay ubicaciones registradas.</td></tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div class="card bg-secondary text-light shadow border-0">
+        <div class="card-body">
+
+            <div class="table-responsive">
+                <table class="table table-dark table-hover align-middle mb-0">
+
+                    <thead>
+                        <tr>
+                            <th>Código</th>
+                            <th>Descripción</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for u in ubicaciones %}
+                        <tr>
+                            <td>{{ u.codigo }}</td>
+                            <td>{{ u.descripcion }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="2" class="text-center text-light-emphasis py-3">
+                                No hay ubicaciones registradas.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+</div>
 {% endblock %}

@@ -202,7 +202,7 @@ def aprobar_recepcion(*, recepcion, usuario):
                 sku=detalle.sku,
                 nombre=detalle.nombre or "Producto sin nombre",
                 categoria=categoria_default,
-                stock_minimo=0,
+                stock_minimo=5,
                 stock_actual=0,
             )
 

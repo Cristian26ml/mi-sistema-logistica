@@ -2,172 +2,169 @@
 {% block title %}Detalle de recepción{% endblock %}
 
 {% block content %}
-<h3>Detalle de recepción</h3>
+<div class="container my-4">
+    <h3 class="mb-4">Detalle de recepción</h3>
 
-<div style="margin-bottom: 16px; display:flex; gap:10px; flex-wrap:wrap;">
-    <a class="btn"
-        style="text-decoration:none; padding:10px 12px; display:inline-block;"
-        href="{% url 'receiving:receipt_list' %}">
-        Volver
-    </a>
+    <div class="d-flex flex-wrap gap-2 mb-4">
+        <a class="btn btn-secondary"
+           href="{% url 'receiving:receipt_list' %}">
+            Volver
+        </a>
 
-    {% if recepcion.estado == "BORRADOR" and puede_recepcionar %}
-    <form method="post" action="{% url 'receiving:receipt_start' recepcion.id %}" style="display:inline;">
-        {% csrf_token %}
-        <button class="btn" type="submit">Iniciar recepción</button>
-    </form>
-    {% endif %}
+        {% if recepcion.estado == "BORRADOR" and puede_recepcionar %}
+            <form method="post" action="{% url 'receiving:receipt_start' recepcion.id %}" class="d-inline">
+                {% csrf_token %}
+                <button class="btn btn-primary" type="submit">Iniciar recepción</button>
+            </form>
+        {% endif %}
 
-    {% if recepcion.estado == "EN_RECEPCION" and puede_recepcionar %}
-    <a class="btn" href="{% url 'receiving:receipt_scan' recepcion.id %}">
-        Recepcionar productos
-    </a>
+        {% if recepcion.estado == "EN_RECEPCION" and puede_recepcionar %}
+            <a class="btn btn-success" href="{% url 'receiving:receipt_scan' recepcion.id %}">
+                Recepcionar productos
+            </a>
 
-    <form method="post" action="{% url 'receiving:receipt_finish' recepcion.id %}" style="display:inline;">
-        {% csrf_token %}
-        <button class="btn" type="submit">Finalizar recepción</button>
-    </form>
-    {% endif %}
+            <form method="post" action="{% url 'receiving:receipt_finish' recepcion.id %}" class="d-inline">
+                {% csrf_token %}
+                <button class="btn btn-warning" type="submit">Finalizar recepción</button>
+            </form>
+        {% endif %}
 
-    {% if recepcion.estado == "PENDIENTE_APROBACION" and es_administrador %}
-    <form method="post" action="{% url 'receiving:receipt_approve' recepcion.id %}" style="display:inline;">
-        {% csrf_token %}
-        <button class="btn" type="submit">Aprobar recepción</button>
-    </form>
-    {% endif %}
-</div>
-<!--<div style="margin-bottom: 16px; display:flex; gap:10px; flex-wrap:wrap;">
-    <a class="btn"
-        style="text-decoration:none; padding:10px 12px; display:inline-block;"
-        href="{% url 'receiving:receipt_list' %}">
-        Volver
-    </a>
+        {% if recepcion.estado == "PENDIENTE_APROBACION" and es_administrador %}
+            <form method="post" action="{% url 'receiving:receipt_approve' recepcion.id %}" class="d-inline">
+                {% csrf_token %}
+                <button class="btn btn-dark" type="submit">Aprobar recepción</button>
+            </form>
+        {% endif %}
+    </div>
 
-    <a class="btn" href="{% url 'receiving:receipt_scan' recepcion.id %}">
-        Recepcionar productos
-    </a>
-</div>-->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <h4 class="card-title mb-4">Información general</h4>
 
-<div style="border:1px solid #ddd; padding:16px; margin-bottom:18px; border-radius:8px;">
-    <h4 style="margin-top:0;">Información general</h4>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <strong>Proveedor:</strong><br>
+                    {{ recepcion.proveedor }}
+                </div>
 
-    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
-        <div>
-            <strong>Proveedor:</strong><br>
-            {{ recepcion.proveedor }}
+                <div class="col-md-6">
+                    <strong>Número documento:</strong><br>
+                    {{ recepcion.numero_documento }}
+                </div>
+
+                <div class="col-md-6">
+                    <strong>Fecha documento:</strong><br>
+                    {{ recepcion.fecha_documento }}
+                </div>
+
+                <div class="col-md-6">
+                    <strong>Estado:</strong><br>
+                    {{ recepcion.get_estado_display }}
+                </div>
+
+                <div class="col-md-6">
+                    <strong>Creado por:</strong><br>
+                    {{ recepcion.creado_por }}
+                </div>
+
+                <div class="col-md-6">
+                    <strong>Fecha creación:</strong><br>
+                    {{ recepcion.fecha_creacion|date:"d/m/Y H:i" }}
+                </div>
+
+                <div class="col-md-6">
+                    <strong>Total líneas:</strong><br>
+                    {{ total_lineas }}
+                </div>
+
+                <div class="col-md-6">
+                    <strong>Total unidades esperadas:</strong><br>
+                    {{ total_unidades }}
+                </div>
+
+                <div class="col-12">
+                    <strong>Archivo adjunto:</strong><br>
+                    {% if recepcion.archivo %}
+                        <a href="{{ recepcion.archivo.url }}" target="_blank" class="link-primary">Ver archivo</a>
+                    {% else %}
+                        <span class="text-muted">Sin archivo</span>
+                    {% endif %}
+                </div>
+
+                <div class="col-12">
+                    <strong>Observación:</strong><br>
+                    {% if recepcion.observacion %}
+                        {{ recepcion.observacion }}
+                    {% else %}
+                        <span class="text-muted">-</span>
+                    {% endif %}
+                </div>
+            </div>
         </div>
+    </div>
 
-        <div>
-            <strong>Número documento:</strong><br>
-            {{ recepcion.numero_documento }}
-        </div>
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h4 class="card-title mb-4">Líneas importadas</h4>
 
-        <div>
-            <strong>Fecha documento:</strong><br>
-            {{ recepcion.fecha_documento }}
-        </div>
+            {% if detalles %}
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>SKU</th>
+                                <th>Producto</th>
+                                <th>Código barra</th>
+                                <th>Cantidad esperada</th>
+                                <th>Cantidad recibida</th>
+                                <th>Observación</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for detalle in detalles %}
+                            <tr>
+                                <td>
+                                    {% if detalle.sku %}
+                                        {{ detalle.sku }}
+                                    {% elif detalle.producto %}
+                                        {{ detalle.producto.sku }}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
 
-        <div>
-            <strong>Estado:</strong><br>
-            {{ recepcion.get_estado_display }}
-        </div>
+                                <td>
+                                    {% if detalle.nombre %}
+                                        {{ detalle.nombre }}
+                                    {% elif detalle.producto %}
+                                        {{ detalle.producto.nombre }}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
 
-        <div>
-            <strong>Creado por:</strong><br>
-            {{ recepcion.creado_por }}
-        </div>
+                                <td>
+                                    {% if detalle.codigo_barra %}
+                                        {{ detalle.codigo_barra }}
+                                    {% elif detalle.producto %}
+                                        {{ detalle.producto.codigo_barra }}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
 
-        <div>
-            <strong>Fecha creación:</strong><br>
-            {{ recepcion.fecha_creacion|date:"d/m/Y H:i" }}
-        </div>
-
-        <div>
-            <strong>Total líneas:</strong><br>
-            {{ total_lineas }}
-        </div>
-
-        <div>
-            <strong>Total unidades esperadas:</strong><br>
-            {{ total_unidades }}
-        </div>
-
-        <div style="grid-column: 1 / -1;">
-            <strong>Archivo adjunto:</strong><br>
-            {% if recepcion.archivo %}
-                <a href="{{ recepcion.archivo.url }}" target="_blank">Ver archivo</a>
+                                <td>{{ detalle.cantidad_esperada }}</td>
+                                <td>{{ detalle.cantidad_recibida }}</td>
+                                <td>{{ detalle.observacion|default:"-" }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             {% else %}
-                Sin archivo
-            {% endif %}
-        </div>
-
-        <div style="grid-column: 1 / -1;">
-            <strong>Observación:</strong><br>
-            {% if recepcion.observacion %}
-                {{ recepcion.observacion }}
-            {% else %}
-                -
+                <p class="mb-0 text-muted">Esta recepción no tiene líneas cargadas.</p>
             {% endif %}
         </div>
     </div>
-</div>
-
-<div style="border:1px solid #ddd; padding:16px; border-radius:8px;">
-    <h4 style="margin-top:0;">Líneas importadas</h4>
-
-    {% if detalles %}
-    <table style="width:100%; border-collapse: collapse;">
-        <thead>
-            <tr style="border-bottom:1px solid #ccc;">
-                <th style="text-align:left; padding:8px;">SKU</th>
-                <th style="text-align:left; padding:8px;">Producto</th>
-                <th style="text-align:left; padding:8px;">Código barra</th>
-                <th style="text-align:left; padding:8px;">Cantidad esperada</th>
-                <th style="text-align:left; padding:8px;">Cantidad recibida</th>
-                <th style="text-align:left; padding:8px;">Observación</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for detalle in detalles %}
-            <tr style="border-bottom:1px solid #eee;">
-                <td style="padding:8px;">
-                    {% if detalle.sku %}
-                        {{ detalle.sku }}
-                    {% elif detalle.producto %}
-                        {{ detalle.producto.sku }}
-                    {% else %}
-                        -
-                    {% endif %}
-                </td>
-
-                <td style="padding:8px;">
-                    {% if detalle.nombre %}
-                        {{ detalle.nombre }}
-                    {% elif detalle.producto %}
-                        {{ detalle.producto.nombre }}
-                    {% else %}
-                        -
-                    {% endif %}
-                </td>
-
-                <td style="padding:8px;">
-                    {% if detalle.codigo_barra %}
-                        {{ detalle.codigo_barra }}
-                    {% elif detalle.producto %}
-                        {{ detalle.producto.codigo_barra }}
-                    {% else %}
-                        -
-                    {% endif %}
-                </td>                
-                <td style="padding:8px;">{{ detalle.cantidad_esperada }}</td>
-                <td style="padding:8px;">{{ detalle.cantidad_recibida }}</td>
-                <td style="padding:8px;">{{ detalle.observacion|default:"-" }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    {% else %}
-        <p>Esta recepción no tiene líneas cargadas.</p>
-    {% endif %}
 </div>
 {% endblock %}

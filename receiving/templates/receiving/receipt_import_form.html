@@ -2,86 +2,102 @@
 {% block title %}Importar recepción{% endblock %}
 
 {% block content %}
-<h3>Importar recepción desde Excel</h3>
+<div class="container py-4">
 
-<p>
-    Sube el archivo enviado por el proveedor para cargar automáticamente
-    los productos esperados de la recepción.
-</p>
+    <h3 class="mb-3">Importar recepción desde Excel</h3>
 
-<form method="post" enctype="multipart/form-data">
-    {% csrf_token %}
+    <p class="text-light-emphasis mb-4">
+        Sube el archivo enviado por el proveedor para cargar automáticamente
+        los productos esperados de la recepción.
+    </p>
 
-    <div class="row" style="display:grid; grid-template-columns: 1fr 1fr; gap:30px;">
-        <div>
-            <label>Proveedor</label>
-            {{ form.proveedor }}
-            {% if form.proveedor.errors %}
-                <div style="color:red;">{{ form.proveedor.errors }}</div>
-            {% endif %}
-        </div>
+    <div class="row justify-content-center">
+        <div class="col-12 col-xl-10">
 
-        <div>
-            <label>Número documento</label>
-            {{ form.numero_documento }}
-            {% if form.numero_documento.errors %}
-                <div style="color:red;">{{ form.numero_documento.errors }}</div>
-            {% endif %}
-        </div>
+            <div class="card bg-secondary text-light shadow border-0 mb-4">
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
 
-        <div>
-            <label>Fecha documento</label>
-            {{ form.fecha_documento }}
-            {% if form.fecha_documento.errors %}
-                <div style="color:red;">{{ form.fecha_documento.errors }}</div>
-            {% endif %}
-        </div>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="{{ form.proveedor.id_for_label }}" class="form-label">Proveedor</label>
+                                {{ form.proveedor }}
+                                {% if form.proveedor.errors %}
+                                    <div class="text-danger mt-1 small">{{ form.proveedor.errors }}</div>
+                                {% endif %}
+                            </div>
 
-        <div>
-            <label>Archivo Excel</label>
-            {{ form.archivo }}
-            {% if form.archivo.errors %}
-                <div style="color:red;">{{ form.archivo.errors }}</div>
-            {% endif %}
+                            <div class="col-md-6">
+                                <label for="{{ form.numero_documento.id_for_label }}" class="form-label">Número documento</label>
+                                {{ form.numero_documento }}
+                                {% if form.numero_documento.errors %}
+                                    <div class="text-danger mt-1 small">{{ form.numero_documento.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="{{ form.fecha_documento.id_for_label }}" class="form-label">Fecha documento</label>
+                                {{ form.fecha_documento }}
+                                {% if form.fecha_documento.errors %}
+                                    <div class="text-danger mt-1 small">{{ form.fecha_documento.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="{{ form.archivo.id_for_label }}" class="form-label">Archivo Excel</label>
+                                {{ form.archivo }}
+                                {% if form.archivo.errors %}
+                                    <div class="text-danger mt-1 small">{{ form.archivo.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger mt-3 mb-0">
+                                {{ form.non_field_errors }}
+                            </div>
+                        {% endif %}
+
+                        <div class="mt-4 d-flex gap-2 flex-wrap">
+                            <button class="btn btn-primary" type="submit">Importar</button>
+                            <a class="btn btn-outline-light" href="{% url 'receiving:receipt_list' %}">
+                                Volver
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card bg-secondary text-light shadow border-0">
+                <div class="card-body">
+                    <h4 class="card-title mb-3">Formato sugerido del Excel</h4>
+
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th>sku</th>
+                                    <th>codigo_barra</th>
+                                    <th>nombre</th>
+                                    <th>cantidad</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>AD</td>
+                                    <td>2000000000135</td>
+                                    <td>Alimento Humedo Hills A/D 156g</td>
+                                    <td>24</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 
-    {% if form.non_field_errors %}
-        <div style="margin-top:10px; color:red;">
-            {{ form.non_field_errors }}
-        </div>
-    {% endif %}
-
-    <div style="margin-top:14px; display:flex; gap:10px;">
-        <button class="btn" type="submit">Importar</button>
-
-        <a class="btn"
-            style="text-decoration:none; padding:10px 12px; display:inline-block;"
-            href="{% url 'receiving:receipt_list' %}">
-            Volver
-        </a>
-    </div>
-</form>
-
-<div style="margin-top: 24px;">
-    <h4>Formato sugerido del Excel</h4>
-    <table style="width:100%; border-collapse: collapse;">
-        <thead>
-            <tr style="border-bottom:1px solid #ccc;">
-                <th style="text-align:left; padding:8px;">sku</th>
-                <th style="text-align:left; padding:8px;">codigo_barra</th>
-                <th style="text-align:left; padding:8px;">nombre</th>
-                <th style="text-align:left; padding:8px;">cantidad</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr style="border-bottom:1px solid #eee;">
-                <td style="padding:8px;">AD</td>
-                <td style="padding:8px;">2000000000135</td>
-                <td style="padding:8px;">Alimento Humedo Hills A/D 156g</td>
-                <td style="padding:8px;">24</td>
-            </tr>
-        </tbody>
-    </table>
 </div>
 {% endblock %}

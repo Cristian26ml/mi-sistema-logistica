@@ -2,40 +2,56 @@
 {% block title %}Generar ubicaciones{% endblock %}
 
 {% block content %}
+<div class="container py-4">
 
-<h3>Generar ubicaciones por rack</h3>
+    <h3 class="mb-4">Generar ubicaciones por rack</h3>
 
-<form method="post">
-    {% csrf_token %}
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
 
-    <div class="row">
+            <div class="card bg-secondary text-light shadow border-0">
+                <div class="card-body">
 
-        <div>
-            <label>Rack</label>
-            {{ form.rack }}
+                    <form method="post">
+                        {% csrf_token %}
+
+                        <div class="row g-3">
+
+                            <div class="col-12">
+                                <label class="form-label">Rack</label>
+                                {{ form.rack }}
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Cantidad de posiciones</label>
+                                {{ form.cantidad_posiciones }}
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Ingresar nivel</label>
+                                {{ form.cantidad_niveles }}
+                            </div>
+
+                        </div>
+
+                        <div class="mt-4 d-flex gap-2 flex-wrap">
+                            <button class="btn btn-primary" type="submit">
+                                Generar ubicaciones
+                            </button>
+
+                            <a class="btn btn-outline-light"
+                                href="{% url 'warehouse:ubicaciones_list' %}">
+                                Volver
+                            </a>
+                        </div>
+
+                    </form>
+
+                </div>
+            </div>
+
         </div>
-
-        <div>
-            <label>Cantidad de posiciones</label>
-            {{ form.cantidad_posiciones }}
-        </div>
-
-        <div>
-            <label>Ingresar nivel</label>
-            {{ form.cantidad_niveles }}
-        </div>
-
     </div>
 
-    <div style="margin-top:14px; display:flex; gap:10px;">
-        <button class="btn" type="submit">Generar ubicaciones</button>
-
-        <a class="btn"
-            style="text-decoration:none; padding:10px 12px; display:inline-block;"
-            href="{% url 'warehouse:ubicaciones_list' %}">
-            Volver
-        </a>
-    </div>
-</form>
-
+</div>
 {% endblock %}

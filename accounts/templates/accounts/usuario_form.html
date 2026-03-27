@@ -3,63 +3,74 @@
 {% block title %}Nuevo usuario{% endblock %}
 
 {% block content %}
-<div class="form-container">
-  <h2 class="form-title">Crear usuario</h2>
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-8 col-xl-7">
+            <div class="card bg-secondary text-light shadow border-0">
+                <div class="card-body p-4">
+                    <h2 class="card-title mb-4">Crear usuario</h2>
 
-  {% if form.errors %}
-    <div class="alert alert-error">
-      {{ form.errors }}
+                    {% if form.errors %}
+                        <div class="alert alert-danger">
+                            {{ form.errors }}
+                        </div>
+                    {% endif %}
+
+                    <form method="post">
+                        {% csrf_token %}
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="id_username" class="form-label">Usuario</label>
+                                {{ form.username }}
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="id_email" class="form-label">Email</label>
+                                {{ form.email }}
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="id_first_name" class="form-label">Nombre</label>
+                                {{ form.first_name }}
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="id_last_name" class="form-label">Apellido</label>
+                                {{ form.last_name }}
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="id_rol" class="form-label">Rol</label>
+                                {{ form.rol }}
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="id_activo" class="form-label">Activo</label>
+                                <div class="form-check mt-2">
+                                    {{ form.activo }}
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="id_password1" class="form-label">Contraseña</label>
+                                {{ form.password1 }}
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="id_password2" class="form-label">Confirmar contraseña</label>
+                                {{ form.password2 }}
+                            </div>
+                        </div>
+
+                        <div class="mt-4 d-flex gap-2">
+                            <button class="btn btn-primary" type="submit">Guardar usuario</button>
+                            <a href="{% url 'inventory:dashboard' %}" class="btn btn-outline-light">Cancelar</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
-  {% endif %}
-
-  <form method="post" class="user-form">
-    {% csrf_token %}
-
-    <div class="grid-form">
-      <div class="form-group">
-        <label for="id_username">Usuario</label>
-        {{ form.username }}
-      </div>
-
-      <div class="form-group">
-        <label for="id_email">Email</label>
-        {{ form.email }}
-      </div>
-
-      <div class="form-group">
-        <label for="id_first_name">Nombre</label>
-        {{ form.first_name }}
-      </div>
-
-      <div class="form-group">
-        <label for="id_last_name">Apellido</label>
-        {{ form.last_name }}
-      </div>
-
-      <div class="form-group">
-        <label for="id_rol">Rol</label>
-        {{ form.rol }}
-      </div>
-
-      <div class="form-group">
-        <label for="id_activo">Activo</label>
-        {{ form.activo }}
-      </div>
-
-      <div class="form-group">
-        <label for="id_password1">Contraseña</label>
-        {{ form.password1 }}
-      </div>
-
-      <div class="form-group">
-        <label for="id_password2">Confirmar contraseña</label>
-        {{ form.password2 }}
-      </div>
-    </div>
-
-    <div class="form-actions">
-      <button class="btn btn-primary" type="submit">Guardar usuario</button>
-    </div>
-  </form>
 </div>
 {% endblock %}

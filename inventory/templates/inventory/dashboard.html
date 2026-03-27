@@ -3,148 +3,187 @@
 
 {% block content %}
 
-<h2 style="margin-top:0;">Dashboard Logístico</h2>
+<div class="container-fluid bg-dark text-light min-vh-100 py-4">
+    <div class="container">
+        <h2 class="mb-4 text-white">Dashboard Logístico</h2>
 
-<div class="dashboard-grid">
-    <div class="stat-card">
-        <h3>Total productos</h3>
-        <p>{{ total_productos }}</p>
-    </div>
+        <div class="row g-3 mb-4">
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card bg-secondary text-light shadow border-0 h-100">
+                    <div class="card-body">
+                        <h5 class="card-title text-uppercase small primary-text-emphasis">Total productos</h5>
+                        <p class="display-6 fw-bold mb-0">{{ total_productos }}</p>
+                    </div>
+                </div>
+            </div>
 
-    <div class="stat-card warning-card">
-        <h3>Stock bajo</h3>
-        <p>{{ stock_bajo }}</p>
-    </div>
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card bg-warning text-dark shadow border-0 h-100">
+                    <div class="card-body">
+                        <h5 class="card-title text-uppercase small primary-text-emphasis">Stock bajo</h5>
+                        <p class="display-6 fw-bold mb-0">{{ stock_bajo }}</p>
+                    </div>
+                </div>
+            </div>
 
-    <div class="stat-card">
-        <h3>Movimientos hoy</h3>
-        <p>{{ movimientos_hoy }}</p>
-    </div>
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card bg-primary text-light shadow border-0 h-100">
+                    <div class="card-body">
+                        <h5 class="card-title text-uppercase small primary-text-emphasis">Movimientos hoy</h5>
+                        <p class="display-6 fw-bold mb-0">{{ movimientos_hoy }}</p>
+                    </div>
+                </div>
+            </div>
 
-    <div class="stat-card info-card">
-        <h3>Pickings pendientes</h3>
-        <p>{{ pickings_pendientes }}</p>
-    </div>
-</div>
-
-<div class="quick-actions">
-    <a class="btn" href="{% url 'catalog:producto_crear' %}">+ Agregar producto</a>
-    <a class="btn" href="{% url 'catalog:categoria_crear' %}">+ Agregar categoría</a>
-    <a class="btn" href="{% url 'inventory:movimiento_crear' %}">+ Registrar movimiento</a>
-    <a class="btn" href="{% url 'picking:orden_crear' %}">+ Nueva orden picking</a>
-    <a class="btn" href="{% url 'warehouse:ubicacion_generar' %}">+ Generar ubicaciones</a>
-    <a class="btn" href="{% url 'warehouse:asignacion_crear' %}">+ Nueva asignación</a>
-</div>
-
-<div class="dashboard-two-columns">
-    <div class="table-card">
-        <div class="section-header">
-            <h3>Productos con stock bajo</h3>
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card bg-info text-dark shadow border-0 h-100">
+                    <div class="card-body">
+                        <h5 class="card-title text-uppercase small primary-text-emphasis">Pickings pendientes</h5>
+                        <p class="display-6 fw-bold mb-0">{{ pickings_pendientes }}</p>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <table class="main-table">
-            <thead>
-                <tr>
-                    <th>SKU</th>
-                    <th>Producto</th>
-                    <th>Stock actual</th>
-                    <th>Stock mínimo</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for p in productos_stock_bajo %}
-                <tr>
-                    <td>{{ p.sku }}</td>
-                    <td>{{ p.nombre }}</td>
-                    <td>{{ p.stock_actual }}</td>
-                    <td>{{ p.stock_minimo }}</td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="4">No hay productos con stock bajo.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-
-    <div class="table-card">
-        <div class="section-header">
-            <h3>Últimas órdenes de picking</h3>
+        <div class="d-flex flex-wrap gap-2 mb-4">
+            <a class="btn btn-outline-light" href="{% url 'catalog:producto_crear' %}">+ Agregar producto</a>
+            <a class="btn btn-outline-light" href="{% url 'catalog:categoria_crear' %}">+ Agregar categoría</a>
+            <a class="btn btn-outline-light" href="{% url 'inventory:movimiento_crear' %}">+ Registrar movimiento</a>
+            <a class="btn btn-outline-light" href="{% url 'picking:orden_crear' %}">+ Nueva orden picking</a>
+            <a class="btn btn-outline-light" href="{% url 'warehouse:ubicacion_generar' %}">+ Generar ubicaciones</a>
+            <a class="btn btn-outline-light" href="{% url 'warehouse:asignacion_crear' %}">+ Nueva asignación</a>
         </div>
 
-        <table class="main-table">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Fecha</th>
-                    <th>Supervisor</th>
-                    <th>Estado</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for o in ultimas_ordenes %}
-                <tr>
-                    <td>
-                        <a href="{% url 'picking:orden_detalle' o.id %}">#{{ o.id }}</a>
-                    </td>
-                    <td>{{ o.fecha|date:"d/m/Y H:i" }}</td>
-                    <td>{{ o.supervisor.username }}</td>
-                    <td>
-                        {% if o.estado == "CREADA" %}
-                            <span class="badge">Creada</span>
-                        {% elif o.estado == "EN_PROCESO" %}
-                            <span class="badge badge-warning">En proceso</span>
-                        {% elif o.estado == "COMPLETADA" %}
-                            <span class="badge badge-success">Completada</span>
-                        {% else %}
-                            <span class="badge">Cancelada</span>
-                        {% endif %}
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="4">No hay órdenes registradas.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-</div>
+        <div class="row g-4 mb-4">
+            <div class="col-12 col-lg-6">
+                <div class="card bg-secondary text-light shadow border-0 h-100">
+                    <div class="card-body">
+                        <h4 class="card-title mb-3">Productos con stock bajo</h4>
 
-<div class="table-card">
-    <div class="section-header">
-        <h3>Últimos movimientos</h3>
-    </div>
+                        <div class="table-responsive">
+                            <table class="table table-dark table-hover align-middle mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>SKU</th>
+                                        <th>Producto</th>
+                                        <th>Stock actual</th>
+                                        <th>Stock mínimo</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for p in productos_stock_bajo %}
+                                    <tr>
+                                        <td>{{ p.sku }}</td>
+                                        <td>{{ p.nombre }}</td>
+                                        <td>{{ p.stock_actual }}</td>
+                                        <td>{{ p.stock_minimo }}</td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="4" class="text-center text-light-emphasis">
+                                            No hay productos con stock bajo.
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-    <table class="main-table">
-        <thead>
-            <tr>
-                <th>Fecha</th>
-                <th>Producto</th>
-                <th>Ubicación</th>
-                <th>Tipo</th>
-                <th>Cantidad</th>
-                <th>Usuario</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for m in ultimos_movimientos %}
-            <tr>
-                <td>{{ m.fecha|date:"d/m/Y H:i" }}</td>
-                <td>{{ m.producto.sku }} - {{ m.producto.nombre }}</td>
-                <td>{{ m.ubicacion.codigo }}</td>
-                <td>{{ m.get_tipo_display }}</td>
-                <td>{{ m.cantidad }}</td>
-                <td>{{ m.usuario.username }}</td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="6">No hay movimientos registrados.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+            <div class="col-12 col-lg-6">
+                <div class="card bg-secondary text-light shadow border-0 h-100">
+                    <div class="card-body">
+                        <h4 class="card-title mb-3">Últimas órdenes de picking</h4>
+
+                        <div class="table-responsive">
+                            <table class="table table-dark table-hover align-middle mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Fecha</th>
+                                        <th>Supervisor</th>
+                                        <th>Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for o in ultimas_ordenes %}
+                                    <tr>
+                                        <td>
+                                            <a class="link-info text-decoration-none" href="{% url 'picking:orden_detalle' o.id %}">
+                                                #{{ o.id }}
+                                            </a>
+                                        </td>
+                                        <td>{{ o.fecha|date:"d/m/Y H:i" }}</td>
+                                        <td>{{ o.supervisor.username }}</td>
+                                        <td>
+                                            {% if o.estado == "CREADA" %}
+                                                <span class="badge bg-secondary">Creada</span>
+                                            {% elif o.estado == "EN_PROCESO" %}
+                                                <span class="badge bg-warning text-dark">En proceso</span>
+                                            {% elif o.estado == "COMPLETADA" %}
+                                                <span class="badge bg-success">Completada</span>
+                                            {% else %}
+                                                <span class="badge bg-danger">Cancelada</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="4" class="text-center text-light-emphasis">
+                                            No hay órdenes registradas.
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card bg-secondary text-light shadow border-0">
+            <div class="card-body">
+                <h4 class="card-title mb-3">Últimos movimientos</h4>
+
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Producto</th>
+                                <th>Ubicación</th>
+                                <th>Tipo</th>
+                                <th>Cantidad</th>
+                                <th>Usuario</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for m in ultimos_movimientos %}
+                            <tr>
+                                <td>{{ m.fecha|date:"d/m/Y H:i" }}</td>
+                                <td>{{ m.producto.sku }} - {{ m.producto.nombre }}</td>
+                                <td>{{ m.ubicacion.codigo }}</td>
+                                <td>{{ m.get_tipo_display }}</td>
+                                <td>{{ m.cantidad }}</td>
+                                <td>{{ m.usuario.username }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center text-light-emphasis">
+                                    No hay movimientos registrados.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
 </div>
 
 {% endblock %}

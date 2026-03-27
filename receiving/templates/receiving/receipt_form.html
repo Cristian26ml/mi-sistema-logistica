@@ -3,67 +3,80 @@
 {% block title %}Nueva recepción{% endblock %}
 
 {% block content %}
-<h3>Nueva recepción</h3>
+<div class="container py-4">
 
-<form method="post" enctype="multipart/form-data">
-    {% csrf_token %}
+    <h3 class="mb-4">Nueva recepción</h3>
 
-    <div class="row" style="display:grid; grid-template-columns: 1fr 1fr; gap:45px;">
-        <div>
-            <label>Proveedor</label>
-            {{ form.proveedor }}
-            {% if form.proveedor.errors %}
-                <div style="color:red;">{{ form.proveedor.errors }}</div>
-            {% endif %}
-        </div>
+    <div class="row justify-content-center">
+        <div class="col-12 col-xl-10">
 
-        <div>
-            <label>Número documento</label>
-            {{ form.numero_documento }}
-            {% if form.numero_documento.errors %}
-                <div style="color:red;">{{ form.numero_documento.errors }}</div>
-            {% endif %}
-        </div>
+            <div class="card bg-secondary text-light shadow border-0">
+                <div class="card-body">
 
-        <div>
-            <label>Fecha documento</label>
-            {{ form.fecha_documento }}
-            {% if form.fecha_documento.errors %}
-                <div style="color:red;">{{ form.fecha_documento.errors }}</div>
-            {% endif %}
-        </div>
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
 
-        <div>
-            <label>Archivo</label>
-            {{ form.archivo }}
-            {% if form.archivo.errors %}
-                <div style="color:red;">{{ form.archivo.errors }}</div>
-            {% endif %}
-        </div>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="{{ form.proveedor.id_for_label }}" class="form-label">Proveedor</label>
+                                {{ form.proveedor }}
+                                {% if form.proveedor.errors %}
+                                    <div class="text-danger mt-1 small">{{ form.proveedor.errors }}</div>
+                                {% endif %}
+                            </div>
 
-        <div style="grid-column: 1 / -1;">
-            <label>Observación</label>
-            {{ form.observacion }}
-            {% if form.observacion.errors %}
-                <div style="color:red;">{{ form.observacion.errors }}</div>
-            {% endif %}
+                            <div class="col-md-6">
+                                <label for="{{ form.numero_documento.id_for_label }}" class="form-label">Número documento</label>
+                                {{ form.numero_documento }}
+                                {% if form.numero_documento.errors %}
+                                    <div class="text-danger mt-1 small">{{ form.numero_documento.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="{{ form.fecha_documento.id_for_label }}" class="form-label">Fecha documento</label>
+                                {{ form.fecha_documento }}
+                                {% if form.fecha_documento.errors %}
+                                    <div class="text-danger mt-1 small">{{ form.fecha_documento.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="{{ form.archivo.id_for_label }}" class="form-label">Archivo</label>
+                                {{ form.archivo }}
+                                {% if form.archivo.errors %}
+                                    <div class="text-danger mt-1 small">{{ form.archivo.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-12">
+                                <label for="{{ form.observacion.id_for_label }}" class="form-label">Observación</label>
+                                {{ form.observacion }}
+                                {% if form.observacion.errors %}
+                                    <div class="text-danger mt-1 small">{{ form.observacion.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger mt-3 mb-0">
+                                {{ form.non_field_errors }}
+                            </div>
+                        {% endif %}
+
+                        <div class="mt-4 d-flex gap-2 flex-wrap">
+                            <button class="btn btn-primary" type="submit">Guardar</button>
+                            <a class="btn btn-outline-light" href="{% url 'receiving:receipt_list' %}">
+                                Volver
+                            </a>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+
         </div>
     </div>
 
-    {% if form.non_field_errors %}
-        <div style="margin-top:10px; color:red;">
-            {{ form.non_field_errors }}
-        </div>
-    {% endif %}
-
-    <div style="margin-top:14px; display:flex; gap:10px;">
-        <button class="btn" type="submit">Guardar</button>
-
-        <a class="btn"
-            style="text-decoration:none; padding:10px 12px; display:inline-block;"
-            href="{% url 'receiving:receipt_list' %}">
-            Volver
-        </a>
-    </div>
-</form>
+</div>
 {% endblock %}

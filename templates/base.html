@@ -1,70 +1,115 @@
 {% load static %}
-
 <!doctype html>
 <html lang="es">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}Sistema Logístico{% endblock %}</title>
-    {% load static %}
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/main.css' %}">
     {% block extra_css %}{% endblock %}
 </head>
-<body>
+<body class="bg-dark text-light">
 
-<div class="layout">
-    <aside class="sidebar">
-        <div class="logo-container">
-            <img src="{% static 'img/logo.png' %}" style="width: 90px; height: auto;" alt="Logo" class="logo-img">
-            <h2 class="logo">LogiSys</h2>
-        </div>
+<div class="container-fluid">
+    <div class="row min-vh-100">
 
-        {% if user.is_authenticated %}
-                <p class="user-info">{{ user.username }} ({{ user.rol }})</p>
-        {% endif %}
-        
+        <aside class="col-12 col-md-3 col-lg-2 bg-black border-end border-secondary p-3">
+            <div class="text-center mb-4">
+                <img src="{% static 'img/logo.png' %}" alt="Logo" class="img-fluid mb-2" style="max-width: 90px;">
+                <h2 class="h4 text-white mb-1">LogiSys</h2>
 
-        <nav class="menu">
-            <a class="btn" href="{% url 'inventory:dashboard' %}">Dashboard</a>
+                {% if user.is_authenticated %}
+                    <p class="text-secondary small mb-0">
+                        {{ user.username }} ({{ user.rol }})
+                    </p>
+                {% endif %}
+            </div>
 
-            {% if user.rol == "ADMIN" %}
-                <a class="btn" href="{% url 'accounts:usuario_crear' %}">Usuarios</a>
+            <nav class="d-grid gap-2">
+                <a class="btn btn-outline-light text-start" href="{% url 'inventory:dashboard' %}">
+                    Dashboard
+                </a>
+
+                {% if user.rol == "ADMIN" %}
+                    <a class="btn btn-outline-light text-start" href="{% url 'accounts:usuario_crear' %}">
+                        Usuarios
+                    </a>
+                {% endif %}
+
+                {% if user.rol == "ADMIN" or user.rol == "SUPERVISOR" %}
+                    <a class="btn btn-outline-light text-start" href="{% url 'catalog:productos_list' %}">
+                        Inventario
+                    </a>
+                    <a class="btn btn-outline-light text-start" href="{% url 'warehouse:ubicaciones_list' %}">
+                        Ubicaciones
+                    </a>
+                    <a class="btn btn-outline-light text-start" href="{% url 'warehouse:asignaciones_list' %}">
+                        Asignaciones
+                    </a>
+                    <a class="btn btn-outline-light text-start" href="{% url 'picking:ordenes_list' %}">
+                        Picking
+                    </a>
+                {% endif %}
+
+                {% if user.rol == "SUPERVISOR" or user.rol == "OPERARIO" %}
+                    <a class="btn btn-outline-light text-start" href="{% url 'inventory:movimientos_list' %}">
+                        Movimientos
+                    </a>
+                {% endif %}
+
+                {% if user.rol == "ADMIN" or user.rol == "SUPERVISOR" %}
+                    <a class="btn btn-outline-light text-start" href="{% url 'catalog:producto_crear' %}">
+                        Recepción
+                    </a>
+                {% endif %}
+
+                {% if user.rol == "ADMIN" or user.rol == "SUPERVISOR" or user.rol == "OPERARIO" %}
+                    <a class="btn btn-outline-light text-start" href="{% url 'receiving:receipt_list' %}">
+                        Recepciones
+                    </a>
+                    <a class="btn btn-outline-light text-start" href="{% url 'inventory:movimiento_crear' %}">
+                        Registrar movimiento
+                    </a>
+                    <a class="btn btn-outline-light text-start" href="{% url 'warehouse:consulta_ubicacion' %}">
+                        Consulta SKU
+                    </a>
+                    <a class="btn btn-outline-light text-start" href="{% url 'picking:mis_pickings' %}">
+                        Mis Pickings
+                    </a>
+                {% endif %}
+
+                <hr class="border-secondary">
+
+                <a class="btn btn-outline-danger text-start" href="{% url 'accounts:logout' %}">
+                    Cerrar sesión
+                </a>
+            </nav>
+        </aside>
+
+        <main class="col-12 col-md-9 col-lg-10 p-4">
+            {% if messages %}
+                <div class="mb-3">
+                    {% for message in messages %}
+                        <div class="alert 
+                            {% if message.tags == 'success' %}alert-success
+                            {% elif message.tags == 'error' %}alert-danger
+                            {% elif message.tags == 'warning' %}alert-warning
+                            {% else %}alert-info
+                            {% endif %}" role="alert">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
             {% endif %}
 
-            {% if user.rol == "ADMIN" or user.rol == "SUPERVISOR" %}
-                <a class="btn" href="{% url 'catalog:productos_list' %}">Productos</a>
-                <a class="btn" href="{% url 'catalog:producto_crear' %}">Agregar producto</a>
-                <a class="btn" href="{% url 'warehouse:ubicaciones_list' %}">Ubicaciones</a>
-                <a class="btn" href="{% url 'warehouse:asignaciones_list' %}">Asignaciones</a>
-                <a class="btn" href="{% url 'picking:ordenes_list' %}">Picking</a>
-            {% endif %}
+            {% block content %}{% endblock %}
+        </main>
 
-            {% if user.rol == "SUPERVISOR" or user.rol == "OPERARIO" %}
-                <a class="btn" href="{% url 'inventory:movimientos_list' %}">Movimientos</a>
-            {% endif %}
-
-            {% if user.rol == "ADMIN" or user.rol == "SUPERVISOR" or user.rol == "OPERARIO" %}
-                <a class="btn" href="{% url 'receiving:receipt_list' %}">Recepciones</a>
-                <a class="btn" href="{% url 'inventory:movimiento_crear' %}">Registrar movimiento</a>
-                <a class="btn" href="{% url 'warehouse:consulta_ubicacion' %}">Consulta SKU</a>
-                <a class="btn" href="{% url 'picking:mis_pickings' %}">Mis Pickings</a>
-            {% endif %}
-
-            <a class="btn btn-outline-danger" href="{% url 'accounts:logout' %}">Cerrar sesión</a>
-        </nav>
-    </aside>
-
-    <main class="main-content">
-        {% if messages %}
-            {% for message in messages %}
-                <div class="msg {{ message.tags }}">{{ message }}</div>
-            {% endfor %}
-        {% endif %}
-
-        {% block content %}{% endblock %}
-    </main>
-
+    </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

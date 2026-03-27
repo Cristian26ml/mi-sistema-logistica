@@ -17,7 +17,7 @@ class Product(models.Model):
     categoria = models.ForeignKey(
         Category, on_delete=models.PROTECT, related_name="productos"
     )
-    stock_minimo = models.PositiveIntegerField(default=0)
+    stock_minimo = models.PositiveIntegerField(default=5)
     stock_actual = models.IntegerField(default=0)
     estado = models.CharField(
         max_length=20,
@@ -37,7 +37,7 @@ class Product(models.Model):
 
         updates = {}
         if creando and not self.codigo_interno:
-            updates["codigo_interno"] = f"INT-{self.id:06d}"
+            updates["codigo_interno"] = f"{self.id:06d}"
 
         if updates:
             Product.objects.filter(pk=self.pk).update(**updates)

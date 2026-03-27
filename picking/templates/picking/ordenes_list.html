@@ -2,63 +2,75 @@
 {% block title %}Órdenes Picking{% endblock %}
 
 {% block content %}
+<div class="container py-4">
 
-    <div class="picking-header">
-        <h3>Órdenes de Picking</h3>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="mb-0">Órdenes de Picking</h3>
 
-        <a class="btn" href="{% url 'picking:orden_crear' %}">+ Nueva Orden</a>
+        <a class="btn btn-primary" href="{% url 'picking:orden_crear' %}">
+            + Nueva Orden
+        </a>
     </div>
 
-    <table style="width:100%; border-collapse:collapse;">
+    <div class="card bg-secondary text-light shadow border-0">
+        <div class="card-body">
 
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Fecha</th>
-                <th>Supervisor</th>
-                <th>Estado</th>
-                <th></th>
-            </tr>
-        </thead>
+            <div class="table-responsive">
+                <table class="table table-dark table-hover align-middle mb-0">
 
-        <tbody>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Fecha</th>
+                            <th>Supervisor</th>
+                            <th>Estado</th>
+                            <th class="text-end">Acción</th>
+                        </tr>
+                    </thead>
 
-            {% for o in ordenes %}
+                    <tbody>
+                        {% for o in ordenes %}
+                        <tr>
+                            <td>#{{ o.id }}</td>
+                            <td>{{ o.fecha|date:"d/m/Y H:i" }}</td>
+                            <td>{{ o.supervisor }}</td>
 
-                <tr>
-                    <td>#{{ o.id }}</td>
-                    <td>{{ o.fecha }}</td>
-                    <td>{{ o.supervisor }}</td>
-                    <td>
-                        {% if o.estado == "CREADA" %}
-                            <span class="badge">Creada</span>
+                            <td>
+                                {% if o.estado == "CREADA" %}
+                                    <span class="badge bg-secondary">Creada</span>
 
-                        {% elif o.estado == "EN_PROCESO" %}
-                            <span class="badge" style="background:#fff7e6; border:1px solid #ffd27a;">
-                                En proceso
-                            </span>
+                                {% elif o.estado == "EN_PROCESO" %}
+                                    <span class="badge bg-warning text-dark">En proceso</span>
 
-                        {% elif o.estado == "COMPLETADA" %}
-                            <span style="display:inline-block; padding:6px 10px; border-radius:999px; background:#e7f8ee; border:1px solid #a7e3bf;">
-                                Completada
-                            </span>
+                                {% elif o.estado == "COMPLETADA" %}
+                                    <span class="badge bg-success">Completada</span>
 
-                        {% else %}
-                            <span class="badge">Cancelada</span>
-                        {% endif %}
-                    </td>
+                                {% else %}
+                                    <span class="badge bg-danger">Cancelada</span>
+                                {% endif %}
+                            </td>
 
-                    <td>
-                        <a href="{% url 'picking:orden_detalle' o.id %}">
-                            Abrir
-                        </a>
-                    </td>
+                            <td class="text-end">
+                                <a class="btn btn-outline-light btn-sm"
+                                    href="{% url 'picking:orden_detalle' o.id %}">
+                                    Abrir
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center text-light-emphasis py-3">
+                                No hay órdenes registradas.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
 
-                </tr>
+                </table>
+            </div>
 
-            {% endfor %}
+        </div>
+    </div>
 
-        </tbody>
-    </table>
-
+</div>
 {% endblock %}

@@ -41,8 +41,8 @@ class ReceiptScanForm(forms.Form):
     codigo = forms.CharField(label="Código escaneado", max_length=100)
 
     cantidad = forms.IntegerField(
-        min_value=1,
-        initial=1,
+        min_value=0,
+        initial=0,
         label="Cantidad recibida"
     )
 

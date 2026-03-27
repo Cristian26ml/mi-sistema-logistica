@@ -1,10 +1,48 @@
 {% extends "base.html" %}
+{% block title %}Nueva Orden Picking{% endblock %}
+
 {% block content %}
-<h3>Nueva Orden de Picking</h3>
-<form method="post">
-    {% csrf_token %}
-    <label>Código de guía</label>
-    <!--<input type="text" name="factura" required>-->
-    <button type="submit" class="btn">Generar Nueva Orden</button>
-</form>
+<div class="container py-4">
+
+    <h3 class="mb-4">Nueva Orden de Picking</h3>
+
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-6 col-lg-5">
+
+            <div class="card bg-secondary text-light shadow border-0">
+                <div class="card-body">
+
+                    <form method="post">
+                        {% csrf_token %}
+
+                        <div class="mb-3">
+                            <label class="form-label">Código de guía</label>
+
+                            <!-- Si después quieres activarlo -->
+                            <!-- <input type="text" name="factura" class="form-control" required> -->
+
+                            <div class="form-text text-light-emphasis">
+                                Se generará automáticamente una nueva orden.
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                Generar Nueva Orden
+                            </button>
+
+                            <a href="{% url 'picking:ordenes_list' %}" class="btn btn-outline-light">
+                                Cancelar
+                            </a>
+                        </div>
+
+                    </form>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
 {% endblock %}

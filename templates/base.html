@@ -53,7 +53,7 @@
                     </a>
                 {% endif %}
 
-                {% if user.rol == "SUPERVISOR" or user.rol == "OPERARIO" %}
+                {% if user.rol == "ADMIN" or user.rol == "SUPERVISOR" or user.rol == "OPERARIO" %}
                     <a class="btn btn-outline-light text-start" href="{% url 'inventory:movimientos_list' %}">
                         Movimientos
                     </a>

@@ -1,6 +1,8 @@
 from django.contrib import messages
 from django.shortcuts import render, redirect
 from django.http import HttpResponseForbidden
+from django.contrib.auth.decorators import user_passes_test
+import uuid
 
 from accounts.decorators import roles_permitidos
 from accounts.permissions import (
@@ -8,9 +10,14 @@ from accounts.permissions import (
     puede_consultar_ubicaciones,
     puede_gestionar_ubicaciones,
 )
-from .models import Location, ProductLocation
+from .models import Location, ProductLocation, Container
 from catalog.models import Product
 from .forms import ProductLocationForm, GenerarUbicacionesForm
+from django.contrib.auth.decorators import login_required
+
+
+def es_supervisor_o_admin(user):
+    return user.rol in ["SUPERVISOR", "ADMIN"]
 
 
 @roles_permitidos("ADMIN", "SUPERVISOR")
@@ -83,6 +90,13 @@ def ubicacion_generar(request):
     return render(request, "warehouse/ubicacion_generar_form.html", {"form": form})
 
 
+@user_passes_test(es_supervisor_o_admin)
+def contenedor_generar(request):
+    codigo = f"CON-{uuid.uuid4().int >> 64}"[:15]
+    cont = Container.objects.create(codigo_contenedor=codigo)
+    return redirect("warehouse:barcodes_dashboard")
+
+
 @roles_permitidos("ADMIN", "SUPERVISOR")
 def asignacion_crear(request):
     if request.method == "POST":
@@ -121,4 +135,17 @@ def ubicacion_por_sku(request):
         "sku": sku,
         "producto": producto,
         "ubicaciones": ubicaciones,
+    })
+
+
+@login_required
+def barcodes_dashboard(request):
+    if request.user.rol not in ["ADMIN", "SUPERVISOR"]:
+        return render(request, "403.html")
+
+    locations = Location.objects.all()
+    containers = Container.objects.all()
+    return render(request, "warehouse/barcodes_dashboard.html", {
+        "locations": locations,
+        "containers": containers
     })

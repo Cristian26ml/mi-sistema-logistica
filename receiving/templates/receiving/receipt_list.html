@@ -10,14 +10,14 @@
         + Nueva recepción
     </a>-->
 
-    <a class="btn" style="text-decoration:none; padding:10px 12px; display:inline-block;"
+    <a class="btn btn-secondary" style="text-decoration:none; padding:10px 12px; display:inline-block;"
         href="{% url 'receiving:receipt_import' %}">
         Importar Excel
     </a>
 </div>
 
 {% if recepciones %}
-    <table style="width:100%; border-collapse: collapse;">
+    <table class="table tabla-personalizada table-hover align-middle mb-0">
         <thead>
             <tr style="border-bottom:1px solid #ccc;">
                 <th style="text-align:left; padding:8px;">Documento</th>

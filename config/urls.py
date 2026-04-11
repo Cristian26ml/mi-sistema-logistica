@@ -26,7 +26,7 @@ urlpatterns = [
     path("", include("catalog.urls")),
     path("", include("warehouse.urls")),
     path("", include("picking.urls")),
-    path("receiving/", include("receiving.urls")),
+    path("", include("receiving.urls")),
 ]
 
 if settings.DEBUG:

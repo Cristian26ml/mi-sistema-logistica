@@ -1,26 +1,35 @@
 body {
     margin: 0;
     font-family: Arial, sans-serif;
-    background: #f5f6fa;
 }
 
-aside .logo-container {
-    display: flex;
-    align-items: center;
-    gap: 12px;
+.allbody, .container {
+    background-color: #012340;
 }
 
-.sidebar-logo {
-    text-align: center;
-    margin-bottom: 20px;
+.card {
+    background-color: #0E1826 !important;
 }
 
-.sidebar-logo img {
-    width: 120px;
-    height: auto;
+.btn {
+    background-color: #012340;
+    color: #FFFFFF;
 }
 
-/*-------- Login Page --------*/
+aside {
+    background-color: #0E1826;
+}
+
+.container-fluid {
+    background-color: #012340;
+}
+
+.tabla-personalizada td, .tabla-personalizada th {
+    background-color: #2E4959 !important;
+    color: #FFFFFF;
+}
+
+/* -------- Login Page -------- */
 .login-page {
     margin: 0;
     min-height: 100vh;
@@ -43,7 +52,8 @@ aside .logo-container {
     border-radius: 20px;
     padding: 32px 28px;
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.18);
-    box-sizing: border-box;}
+    box-sizing: border-box;
+}
 
 .login-brand {
     text-align: center;
@@ -74,40 +84,6 @@ aside .logo-container {
     gap: 16px;
 }
 
-.form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.form-sku {
-    grid-column: span 2;
-    background-color: #0f172a;
-}
-
-.form-group label {
-    font-weight: 600;
-    color: #1e293b;
-}
-
-.form-group input {
-    width: 100%;
-    padding: 12px 14px;
-    border: 1px solid #cbd5e1;
-    border-radius: 10px;
-    font-size: 15px;
-    background: #f8fafc;
-    box-sizing: border-box;
-    transition: 0.2s ease;
-}
-
-.form-group input:focus {
-    outline: none;
-    border-color: #2563eb;
-    background: #fff;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
-}
-
 .login-btn {
     width: 100%;
     padding: 12px 16px;
@@ -125,150 +101,9 @@ aside .logo-container {
     background: #1e293b;
 }
 
-.msg {
-    margin-bottom: 14px;
-    padding: 10px 12px;
-    border-radius: 10px;
-    font-size: 14px;
-}
-
-.msg.success {
-    background: #e7f8ee;
-    border: 1px solid #a7e3bf;
-    color: #166534;
-}
-
-.msg.error {
-    background: #ffecec;
-    border: 1px solid #ffb3b3;
-    color: #991b1b;
-}
-
-.msg.warning {
-    background: #fff7e6;
-    border: 1px solid #ffd27a;
-    color: #92400e;
-}
-
-/*-------------Usuarios----------------*/
-
-
-.form-container {
-    margin: 0 auto;
-    padding: 24px;
-    background: #fff;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-}
-
-.form-title {
-    font-size: 1.6rem;
-    margin-bottom: 20px;
-    color: #333;
-    text-align: center;
-}
-
-.alert-error {
-    background: #ffe0e0;
-    color: #a00;
-    padding: 12px;
-    border-radius: 6px;
-    margin-bottom: 16px;
-}
-
-.user-form .grid-form {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-}
-
-.form-group {
+/* Logo opcional */
+aside .logo-container {
     display: flex;
-    flex-direction: column;
+    align-items: center;
+    gap: 12px;
 }
-
-.form-group label {
-    font-weight: 600;
-    margin-bottom: 6px;
-    color: #444;
-}
-
-.form-actions {
-    margin-top: 20px;
-    text-align: right;
-}
-
-.btn-primary:hover {
-    background: #0056b3;
-}
-
-/*-------------Agregar Productos----------------*/
-/* Contenedor principal del formulario */
-.form-container {
-    margin: 0 auto;
-    background: #fff;
-    padding: 2rem;
-    border-radius: 10px;
-    box-shadow: 0 6px 16px rgba(0,0,0,0.1);
-}
-
-/* Título */
-.form-container h3 {
-    font-size: 1.8rem;
-    margin-bottom: 1.5rem;
-    color: #333;
-}
-
-/* Mensajes de error */
-.msg.error {
-    background: #ffe5e5;
-    color: #b00020;
-    padding: 1rem;
-    border-radius: 6px;
-    margin-bottom: 1rem;
-    font-size: 0.95rem;
-}
-
-/* Botón */
-.btn:hover {
-    background: #357ab8;
-}
-
-/*-----------------------------*/
-
-.menu a:hover {
-    background: #475569;
-}
-
-.stat-card h3 {
-    margin: 0 0 10px 0;
-    font-size: 16px;
-    color: #334155;
-}
-
-.stat-card p {
-    margin: 0;
-    font-size: 32px;
-    font-weight: bold;
-    color: #0f172a;
-}
-
-.main-table th,
-.main-table td {
-    text-align: left;
-    padding: 12px 10px;
-    border-bottom: 1px solid #e5e7eb;
-}
-
-.main-table th {
-    background: #f8fafc;
-    color: #334155;
-}
-
-@media (max-width: 900px) {
-    .dashboard-two-columns {
-        grid-template-columns: 1fr;
-    }
-}
-
-

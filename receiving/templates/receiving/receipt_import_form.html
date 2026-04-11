@@ -1,12 +1,12 @@
 {% extends "base.html" %}
-{% block title %}Importar recepción{% endblock %}
+{% load widget_tweaks %} {% block title %}Importar recepción{% endblock %}
 
 {% block content %}
 <div class="container py-4">
 
     <h3 class="mb-3">Importar recepción desde Excel</h3>
 
-    <p class="text-light-emphasis mb-4">
+    <p class="text-light mb-4">
         Sube el archivo enviado por el proveedor para cargar automáticamente
         los productos esperados de la recepción.
     </p>
@@ -15,40 +15,40 @@
         <div class="col-12 col-xl-10">
 
             <div class="card bg-secondary text-light shadow border-0 mb-4">
-                <div class="card-body">
+                <div class="card-body p-4">
                     <form method="post" enctype="multipart/form-data">
                         {% csrf_token %}
 
                         <div class="row g-3">
                             <div class="col-md-6">
-                                <label for="{{ form.proveedor.id_for_label }}" class="form-label">Proveedor</label>
-                                {{ form.proveedor }}
+                                <label class="form-label">Proveedor</label>
+                                {% render_field form.proveedor class="form-select" %}
                                 {% if form.proveedor.errors %}
-                                    <div class="text-danger mt-1 small">{{ form.proveedor.errors }}</div>
+                                    <div class="text-warning mt-1 small">{{ form.proveedor.errors }}</div>
                                 {% endif %}
                             </div>
 
                             <div class="col-md-6">
-                                <label for="{{ form.numero_documento.id_for_label }}" class="form-label">Número documento</label>
-                                {{ form.numero_documento }}
+                                <label class="form-label">Número documento</label>
+                                {% render_field form.numero_documento class="form-control" placeholder="Ej: 12345" %}
                                 {% if form.numero_documento.errors %}
-                                    <div class="text-danger mt-1 small">{{ form.numero_documento.errors }}</div>
+                                    <div class="text-warning mt-1 small">{{ form.numero_documento.errors }}</div>
                                 {% endif %}
                             </div>
 
                             <div class="col-md-6">
-                                <label for="{{ form.fecha_documento.id_for_label }}" class="form-label">Fecha documento</label>
-                                {{ form.fecha_documento }}
+                                <label class="form-label">Fecha documento</label>
+                                {% render_field form.fecha_documento class="form-control" type="date" %}
                                 {% if form.fecha_documento.errors %}
-                                    <div class="text-danger mt-1 small">{{ form.fecha_documento.errors }}</div>
+                                    <div class="text-warning mt-1 small">{{ form.fecha_documento.errors }}</div>
                                 {% endif %}
                             </div>
 
                             <div class="col-md-6">
-                                <label for="{{ form.archivo.id_for_label }}" class="form-label">Archivo Excel</label>
-                                {{ form.archivo }}
+                                <label class="form-label">Archivo Excel</label>
+                                {% render_field form.archivo class="form-control" %}
                                 {% if form.archivo.errors %}
-                                    <div class="text-danger mt-1 small">{{ form.archivo.errors }}</div>
+                                    <div class="text-warning mt-1 small">{{ form.archivo.errors }}</div>
                                 {% endif %}
                             </div>
                         </div>
@@ -60,8 +60,8 @@
                         {% endif %}
 
                         <div class="mt-4 d-flex gap-2 flex-wrap">
-                            <button class="btn btn-primary" type="submit">Importar</button>
-                            <a class="btn btn-outline-light" href="{% url 'receiving:receipt_list' %}">
+                            <button class="btn btn-secundary px-4" type="submit">Importar</button>
+                            <a class="btn btn-secundary" href="{% url 'receiving:receipt_list' %}">
                                 Volver
                             </a>
                         </div>
@@ -69,12 +69,13 @@
                 </div>
             </div>
 
-            <div class="card bg-secondary text-light shadow border-0">
-                <div class="card-body">
+            <div class="card bg-dark text-light shadow border-0">
+                <div class="card-body p-4">
                     <h4 class="card-title mb-3">Formato sugerido del Excel</h4>
+                    <p class="small text-light mb-3">Asegúrate de que las cabeceras coincidan exactamente con la tabla de abajo.</p>
 
                     <div class="table-responsive">
-                        <table class="table table-dark table-hover align-middle mb-0">
+                        <table class="table tabla-personalizada table-hover align-middle mb-0">
                             <thead>
                                 <tr>
                                     <th>sku</th>

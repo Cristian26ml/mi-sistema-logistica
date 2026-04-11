@@ -3,7 +3,7 @@
 
 {% block content %}
 
-<div class="container-fluid bg-dark text-light min-vh-100 py-4">
+<div class="container-fluid text-light min-vh-100 py-4">
     <div class="container">
         <h2 class="mb-4 text-white">Dashboard Logístico</h2>
 
@@ -18,7 +18,7 @@
             </div>
 
             <div class="col-12 col-sm-6 col-xl-3">
-                <div class="card bg-warning text-dark shadow border-0 h-100">
+                <div class="card bg-warning text-light shadow border-0 h-100">
                     <div class="card-body">
                         <h5 class="card-title text-uppercase small primary-text-emphasis">Stock bajo</h5>
                         <p class="display-6 fw-bold mb-0">{{ stock_bajo }}</p>
@@ -36,7 +36,7 @@
             </div>
 
             <div class="col-12 col-sm-6 col-xl-3">
-                <div class="card bg-info text-dark shadow border-0 h-100">
+                <div class="card bg-info text-light shadow border-0 h-100">
                     <div class="card-body">
                         <h5 class="card-title text-uppercase small primary-text-emphasis">Pickings pendientes</h5>
                         <p class="display-6 fw-bold mb-0">{{ pickings_pendientes }}</p>
@@ -46,12 +46,13 @@
         </div>
 
         <div class="d-flex flex-wrap gap-2 mb-4">
-            <a class="btn btn-outline-light" href="{% url 'catalog:producto_crear' %}">+ Agregar producto</a>
-            <a class="btn btn-outline-light" href="{% url 'catalog:categoria_crear' %}">+ Agregar categoría</a>
-            <a class="btn btn-outline-light" href="{% url 'inventory:movimiento_crear' %}">+ Registrar movimiento</a>
-            <a class="btn btn-outline-light" href="{% url 'picking:orden_crear' %}">+ Nueva orden picking</a>
-            <a class="btn btn-outline-light" href="{% url 'warehouse:ubicacion_generar' %}">+ Generar ubicaciones</a>
-            <a class="btn btn-outline-light" href="{% url 'warehouse:asignacion_crear' %}">+ Nueva asignación</a>
+            <a class="btn btn-secondary" href="{% url 'catalog:producto_crear' %}">+ Agregar producto</a>
+            <a class="btn btn-secondary" href="{% url 'catalog:categoria_crear' %}">+ Agregar categoría</a>
+            <a class="btn btn-secondary" href="{% url 'inventory:movimiento_crear' %}">+ Registrar movimiento</a>
+            <a class="btn btn-secondary" href="{% url 'picking:orden_crear' %}">+ Nueva orden picking</a>
+            <a class="btn btn-secondary" href="{% url 'warehouse:ubicacion_generar' %}">+ Generar ubicaciones</a>
+            <a class="btn btn-secondary" href="{% url 'warehouse:asignacion_crear' %}">+ Nueva asignación</a>
+            <a class="btn btn-secondary" href="{% url 'warehouse:contenedor_generar' %}">+ Generar contenedor</a>
         </div>
 
         <div class="row g-4 mb-4">
@@ -61,7 +62,7 @@
                         <h4 class="card-title mb-3">Productos con stock bajo</h4>
 
                         <div class="table-responsive">
-                            <table class="table table-dark table-hover align-middle mb-0">
+                            <table class="table tabla-personalizada table-hover align-middle mb-0">
                                 <thead>
                                     <tr>
                                         <th>SKU</th>
@@ -80,7 +81,7 @@
                                     </tr>
                                     {% empty %}
                                     <tr>
-                                        <td colspan="4" class="text-center text-light-emphasis">
+                                        <td colspan="4" class="text-center text-light">
                                             No hay productos con stock bajo.
                                         </td>
                                     </tr>
@@ -98,7 +99,7 @@
                         <h4 class="card-title mb-3">Últimas órdenes de picking</h4>
 
                         <div class="table-responsive">
-                            <table class="table table-dark table-hover align-middle mb-0">
+                            <table class="table tabla-personalizada table-hover align-middle mb-0">
                                 <thead>
                                     <tr>
                                         <th>ID</th>
@@ -131,7 +132,7 @@
                                     </tr>
                                     {% empty %}
                                     <tr>
-                                        <td colspan="4" class="text-center text-light-emphasis">
+                                        <td colspan="4" class="text-center text-light">
                                             No hay órdenes registradas.
                                         </td>
                                     </tr>
@@ -149,7 +150,7 @@
                 <h4 class="card-title mb-3">Últimos movimientos</h4>
 
                 <div class="table-responsive">
-                    <table class="table table-dark table-hover align-middle mb-0">
+                    <table class="table tabla-personalizada table-hover align-middle mb-0">
                         <thead>
                             <tr>
                                 <th>Fecha</th>
@@ -172,7 +173,7 @@
                             </tr>
                             {% empty %}
                             <tr>
-                                <td colspan="6" class="text-center text-light-emphasis">
+                                <td colspan="6" class="text-center text-light">
                                     No hay movimientos registrados.
                                 </td>
                             </tr>
@@ -182,7 +183,6 @@
                 </div>
             </div>
         </div>
-
     </div>
 </div>
 

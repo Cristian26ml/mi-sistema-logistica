@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
-{% block title %}Nuevo producto{% endblock %}
+{% load widget_tweaks %} {% block title %}Nuevo producto{% endblock %}
 
 {% block content %}
 <div class="container py-4">
@@ -16,52 +16,50 @@
     <div class="row justify-content-center">
         <div class="col-12 col-lg-8">
 
-            <div class="card bg-secondary text-light shadow border-0">
-                <div class="card-body">
+            <div class="card bg-dark text-light shadow border-0">
+                <div class="card-body p-4">
 
                     <form method="post">
                         {% csrf_token %}
 
                         <div class="row g-3">
-
                             <div class="col-md-6">
                                 <label class="form-label"><strong>SKU</strong></label>
-                                {{ form.sku }}
+                                {% render_field form.sku class="form-control" placeholder="Ej: PROD-001" %}
                             </div>
 
                             <div class="col-md-6">
                                 <label class="form-label"><strong>Código de barras</strong></label>
-                                {{ form.codigo_barra }}
+                                {% render_field form.codigo_barra class="form-control" %}
                             </div>
 
-                            <div class="col-md-6">
-                                <label class="form-label"><strong>Nombre</strong></label>
-                                {{ form.nombre }}
+                            <div class="col-md-12"> <label class="form-label"><strong>Nombre</strong></label>
+                                {% render_field form.nombre class="form-control" %}
                             </div>
 
-                            <div class="col-md-6">
+                            <div class="col-md-12">
                                 <label class="form-label"><strong>Categoría</strong></label>
-                                {{ form.categoria }}
+                                {% render_field form.categoria class="form-select" %}
                             </div>
 
                             <div class="col-md-6">
                                 <label class="form-label"><strong>Stock mínimo</strong></label>
-                                {{ form.stock_minimo }}
+                                {% render_field form.stock_minimo class="form-control" type="number" %}
                             </div>
 
                             <div class="col-md-6">
                                 <label class="form-label"><strong>Stock actual</strong></label>
-                                {{ form.stock_actual }}
+                                {% render_field form.stock_actual class="form-control" type="number" %}
                             </div>
 
                         </div>
 
                         <div class="mt-4 d-flex gap-2">
-                            <button class="btn btn-primary" type="submit">
+                            <button class="btn btn-secundary" type="submit">
                                 Guardar producto
                             </button>
 
-                            <a href="{% url 'catalog:productos_list' %}" class="btn btn-outline-light">
+                            <a href="{% url 'catalog:productos_list' %}" class="btn btn-secundary">
                                 Cancelar
                             </a>
                         </div>

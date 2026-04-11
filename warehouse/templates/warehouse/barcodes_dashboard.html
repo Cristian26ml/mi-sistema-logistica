@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% block title %}Códigos de barras{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="mb-4">Módulo de Códigos de Barras</h2>
+
+    <div class="row g-4">
+        <div class="col-12 col-lg-6">
+            <div class="card bg-secondary text-light shadow border-0 h-100">
+
+                <div class="table-responsive">
+                    <h4 class="card-title mb-3">Ubicaciones</h4>
+                    <input type="text" id="ubicacionSearch" class="form-control mb-3" placeholder="Buscar ubicación...">
+                    <table class="table tabla-personalizada table-hover align-middle mb-0 table-sm" id="ubicacionesTable">
+                        <thead>
+                            <tr>
+                                <th>Código</th>
+                                <th>Descripción</th>
+                                <th>Código único</th>
+                                <th>Código de barras</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for loc in locations %}
+                            <tr>
+                                <td>{{ loc.codigo }}</td>
+                                <td>{{ loc.descripcion }}</td>
+                                <td>{{ loc.codigo_ubicacion }}</td>
+                                <td>
+                                    {% if loc.codigo_barra_imagen %}
+                                        <img src="/{{ loc.codigo_barra_imagen }}" width="150" id="barcode-{{ loc.id }}" />
+                                        <button class="btn btn-sm btn-info mt-2" onclick="printBarcode('barcode-{{ loc.id }}')">Imprimir</button>
+                                    {% else %}
+                                        Sin código
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-lg-6">
+            <div class="card bg-secondary text-light shadow border-0 h-100">
+
+                <div class="table-responsive">
+                    <h4 class="card-title mb-3">Contenedores</h4>
+                    <input type="text" id="contenedorSearch" class="form-control mb-3" placeholder="Buscar contenedor...">
+                    <table class="table tabla-personalizada table-hover align-middle mb-0" id="contenedoresTable">
+                        <thead>
+                            <tr>
+                                <th>Código contenedor</th>
+                                <th>Ubicación</th>
+                                <th>Código de barras</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for cont in containers %}
+                            <tr>
+                                <td>{{ cont.codigo_contenedor }}</td>
+                                <td>{{ cont.ubicacion.codigo }}</td>
+                                <td>
+                                    {% if cont.codigo_barra_imagen %}
+                                        <img src="/{{ cont.codigo_barra_imagen }}" width="150" id="barcode-{{ cont.id }}" />
+                                        <button class="btn btn-sm btn-info mt-2" onclick="printBarcode('barcode-{{ cont.id }}')">Imprimir</button>
+                                    {% else %}
+                                        Sin código
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function printBarcode(id) {
+    // Pedir texto adicional al usuario
+    var extraText = prompt("Agregar texto al código de barras:", "");
+
+    // Obtener el código de barras
+    var content = document.getElementById(id).outerHTML;
+
+    // Crear ventana de impresión
+    var printWindow = window.open('', '', 'width=400,height=400');
+    printWindow.document.write('<html><head><title>Imprimir código</title></head><body>');
+    
+    // Siempre escribir el código de barras
+    printWindow.document.write(content);
+
+    // Si el usuario escribió algo, añadirlo debajo
+    if (extraText && extraText.trim() !== "") {
+        printWindow.document.write('<p style="margin-top:10px; font-weight:bold;">' + extraText + '</p>');
+    }
+
+    printWindow.document.write('</body></html>');
+    printWindow.document.close();
+
+    // Lanzar impresión siempre
+    printWindow.print();
+}
+
+document.getElementById("ubicacionSearch").addEventListener("keyup", function() {
+    var value = this.value.toLowerCase();
+    var rows = document.querySelectorAll("#ubicacionesTable tbody tr");
+    rows.forEach(function(row) {
+        row.style.display = row.textContent.toLowerCase().includes(value) ? "" : "none";
+    });
+});
+
+document.getElementById("contenedorSearch").addEventListener("keyup", function() {
+    var value = this.value.toLowerCase();
+    var rows = document.querySelectorAll("#contenedoresTable tbody tr");
+    rows.forEach(function(row) {
+        row.style.display = row.textContent.toLowerCase().includes(value) ? "" : "none";
+    });
+});
+
+
+</script>
+{% endblock %}

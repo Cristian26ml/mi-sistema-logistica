@@ -2,12 +2,6 @@ from django import forms
 from .models import ProductLocation
 
 
-# class LocationForm(forms.ModelForm):
-#    class Meta:
-#        model = Location
-#        fields = ["codigo", "descripcion"]
-
-
 class ProductLocationForm(forms.ModelForm):
     class Meta:
         model = ProductLocation

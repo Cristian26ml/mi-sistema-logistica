@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}Generar código de barras{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm p-4"> <h2 class="h4 mb-4 text-center text-light">Generar código de barras</h2>
+                
+                <form method="post" action="{% url 'warehouse:generar_barcode' %}" target="_blank" class="text-center">
+                    {% csrf_token %}
+                    <div class="mb-3 text-start">
+                        <label for="codigo" class="form-label text-light">Ingrese código:</label>
+                        <input type="text" name="codigo" id="codigo" class="form-control" placeholder="Ej: 12345678" required>
+                    </div>
+                    <button type="submit" class="btn btn-dark text-start mb-3">
+                        Generar e Imprimir
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -5,12 +5,7 @@
 <h3>Recepciones</h3>
 
 <div style="margin-bottom: 14px; display:flex; gap:10px;">
-    <!--<a class="btn" style="text-decoration:none; padding:10px 12px; display:inline-block;"
-        href="{% url 'receiving:receipt_create' %}">
-        + Nueva recepción
-    </a>-->
-
-    <a class="btn btn-secondary" style="text-decoration:none; padding:10px 12px; display:inline-block;"
+    <a class="btn btn-dark text-start mb-3" style="text-decoration:none; padding:10px 12px; display:inline-block;"
         href="{% url 'receiving:receipt_import' %}">
         Importar Excel
     </a>
@@ -39,13 +34,13 @@
                 <td style="padding:8px;">{{ recepcion.detalles.count }}</td>
                 <td style="padding:8px;">
                     {% if recepcion.archivo %}
-                        <a href="{{ recepcion.archivo.url }}" target="_blank">Ver archivo</a>
+                        <a class="btn btn-secondary text-light" href="{{ recepcion.archivo.url }}" target="_blank">Ver archivo</a>
                     {% else %}
                         -
                     {% endif %}
                 </td>
                 <td style="padding:8px;">
-                    <a href="{% url 'receiving:receipt_detail' recepcion.id %}">Ver detalle</a>
+                    <a class="btn btn-secondary text-light" href="{% url 'receiving:receipt_detail' recepcion.id %}">Ver detalle</a>
                 </td>
             </tr>
             {% endfor %}

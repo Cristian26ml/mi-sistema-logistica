@@ -10,12 +10,13 @@
     <div class="card bg-secondary text-light shadow border-0">
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table tabla-personalizada table-hover align-middle mb-0">
+                <table class="table table-dark table-hover align-middle mb-0">
                     <thead>
                         <tr>
                             <th>Orden</th>
                             <th>Producto</th>
                             <th>Cantidad</th>
+                            <th>Contenedor</th>
                             <th>Ubicación</th>
                             <th class="text-end">Acción</th>
                         </tr>
@@ -26,16 +27,23 @@
                             <td>#{{ d.orden.id }}</td>
                             <td>{{ d.producto.sku }} - {{ d.producto.nombre }}</td>
                             <td>{{ d.cantidad }}</td>
-                            <td>{{ d.ubicacion.codigo }}</td>
+                            <td>{{ d.contenedor.codigo_contenedor }}</td>
+                            <td>
+                                {% if d.contenedor.ubicacion %}
+                                    {{ d.contenedor.ubicacion.codigo }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
                             <td class="text-end">
-                                <a class="btn btn-primary btn-sm" href="{% url 'picking:confirmar_picking' d.id %}">
+                                <a class="btn btn-dark btn-sm" href="{% url 'picking:confirmar_picking' d.id %}">
                                     Confirmar
                                 </a>
                             </td>
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="5" class="text-center text-light py-3">
+                            <td colspan="6" class="text-center text-light py-3">
                                 No tienes pickings asignados.
                             </td>
                         </tr>

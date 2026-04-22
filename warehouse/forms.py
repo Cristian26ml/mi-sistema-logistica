@@ -1,5 +1,6 @@
 from django import forms
 from .models import ProductLocation
+from .models import ProductContainer
 
 
 class ProductLocationForm(forms.ModelForm):
@@ -34,3 +35,9 @@ class GenerarUbicacionesForm(forms.Form):
             )
 
         return rack
+
+
+class ProductContainerForm(forms.ModelForm):
+    class Meta:
+        model = ProductContainer
+        fields = ["producto", "contenedor", "cantidad"]

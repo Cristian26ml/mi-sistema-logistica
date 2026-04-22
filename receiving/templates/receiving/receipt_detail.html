@@ -6,7 +6,7 @@
     <h3 class="mb-4">Detalle de recepción</h3>
 
     <div class="d-flex flex-wrap gap-2 mb-4">
-        <a class="btn btn-secondary"
+        <a class="btn btn-dark text-start mb-3"
            href="{% url 'receiving:receipt_list' %}">
             Volver
         </a>
@@ -14,34 +14,34 @@
         {% if recepcion.estado == "BORRADOR" and puede_recepcionar %}
             <form method="post" action="{% url 'receiving:receipt_start' recepcion.id %}" class="d-inline">
                 {% csrf_token %}
-                <button class="btn btn-primary" type="submit">Iniciar recepción</button>
+                <button class="btn btn-dark text-start mb-3" type="submit">Iniciar recepción</button>
             </form>
         {% endif %}
 
         {% if recepcion.estado == "EN_RECEPCION" and puede_recepcionar %}
-            <a class="btn btn-success" href="{% url 'receiving:receipt_scan' recepcion.id %}">
+            <a class="btn btn-dark text-start mb-3" href="{% url 'receiving:receipt_scan' recepcion.id %}">
                 Recepcionar productos
             </a>
 
             <form method="post" action="{% url 'receiving:receipt_finish' recepcion.id %}" class="d-inline">
                 {% csrf_token %}
-                <button class="btn btn-warning" type="submit">Finalizar recepción</button>
+                <button class="btn btn-dark text-start mb-3" type="submit">Finalizar recepción</button>
             </form>
         {% endif %}
 
         {% if recepcion.estado == "PENDIENTE_APROBACION" and es_administrador %}
             <form method="post" action="{% url 'receiving:receipt_approve' recepcion.id %}" class="d-inline">
                 {% csrf_token %}
-                <button class="btn btn-dark" type="submit">Aprobar recepción</button>
+                <button class="btn btn-dark text-start mb-3" type="submit">Aprobar recepción</button>
             </form>
         {% endif %}
     </div>
 
     <div class="card shadow-sm mb-4">
         <div class="card-body">
-            <h4 class="card-title mb-4">Información general</h4>
+            <h4 class="card-title text-light mb-4">Información general</h4>
 
-            <div class="row g-3">
+            <div class="row text-light g-3">
                 <div class="col-md-6">
                     <strong>Proveedor:</strong><br>
                     {{ recepcion.proveedor }}
@@ -85,7 +85,7 @@
                 <div class="col-12">
                     <strong>Archivo adjunto:</strong><br>
                     {% if recepcion.archivo %}
-                        <a href="{{ recepcion.archivo.url }}" target="_blank" class="link-primary">Ver archivo</a>
+                        <a href="{{ recepcion.archivo.url }}" target="_blank" class="btn btn-secondary text-light">Ver archivo</a>
                     {% else %}
                         <span class="text-muted">Sin archivo</span>
                     {% endif %}
@@ -105,11 +105,11 @@
 
     <div class="card shadow-sm">
         <div class="card-body">
-            <h4 class="card-title mb-4">Líneas importadas</h4>
+            <h4 class="card-title text-light mb-4">Líneas importadas</h4>
 
             {% if detalles %}
                 <div class="table-responsive">
-                    <table class="table table-bordered table-hover align-middle">
+                    <table class="table tabla-personalizada table-hover align-middle">
                         <thead class="table-light">
                             <tr>
                                 <th>SKU</th>

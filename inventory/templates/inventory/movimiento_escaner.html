@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}Transferencia con escáner{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h3 class="mb-4">Transferencia con escaneo</h3>
+
+    <!-- Escanear contenedor origen -->
+    <label><strong>Escanee contenedor origen</strong></label>
+    <input type="text" id="codigo_origen" class="form-control" placeholder="Escanee código de barra">
+
+    <!-- Tabla de productos -->
+    <table class="table table-dark mt-3" id="tabla_productos">
+        <thead>
+            <tr>
+                <th>SKU</th>
+                <th>Producto</th>
+                <th>Cantidad</th>
+                <th>Acción</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <!-- Modal de transferencia -->
+    <div id="modal_transferencia" style="display:none;" class="mt-4">
+        <h5>Transferir producto</h5>
+        <form method="post" action="{% url 'inventory:transferir_producto' %}">
+            {% csrf_token %}
+            <input type="hidden" name="producto_id" id="producto_id">
+            <input type="hidden" name="contenedor_origen_id" id="contenedor_origen_id">
+
+            <label><strong>Escanee contenedor destino</strong></label>
+            <input type="text" name="contenedor_destino_id" id="codigo_destino" class="form-control">
+
+            <label class="mt-2"><strong>Cantidad a transferir</strong></label>
+            <input type="number" name="cantidad" id="cantidad_transferir" min="1" class="form-control">
+
+            <button type="submit" class="btn btn-success mt-3">Guardar movimiento</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    const tablaBody = document.querySelector("#tabla_productos tbody");
+    const modal = document.getElementById("modal_transferencia");
+
+    // Escuchar Enter en el input de código de barra
+    document.getElementById("codigo_origen").addEventListener("keydown", function(e) {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            const codigo = this.value.trim();
+            if (!codigo) return;
+
+            fetch("{% url 'inventory:escanear_contenedor' %}?codigo=" + codigo)
+                .then(res => res.json())
+                .then(data => {
+                    tablaBody.innerHTML = "";
+                    if (data.error) {
+                        alert(data.error);
+                        return;
+                    }
+                    data.productos.forEach(p => {
+                        const row = document.createElement("tr");
+                        row.innerHTML = `
+                            <td>${p.sku}</td>
+                            <td>${p.nombre}</td>
+                            <td>${p.cantidad}</td>
+                            <td>
+                                <button class="btn btn-primary btn-sm"
+                                    onclick="transferir(${p.producto_id}, ${data.contenedor_id})">
+                                    Transferir
+                                </button>
+                            </td>
+                        `;
+                        tablaBody.appendChild(row);
+                    });
+                })
+                .catch(err => alert("Error al consultar contenedor: " + err));
+        }
+    });
+
+    function transferir(productoId, contenedorOrigenId) {
+        document.getElementById("producto_id").value = productoId;
+        document.getElementById("contenedor_origen_id").value = contenedorOrigenId;
+        modal.style.display = "block";
+    }
+</script>
+{% endblock %}

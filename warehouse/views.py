@@ -2,22 +2,45 @@ from django.contrib import messages
 from django.shortcuts import render, redirect
 from django.http import HttpResponseForbidden
 from django.contrib.auth.decorators import user_passes_test
+from .forms import ProductContainerForm
 import uuid
-
 from accounts.decorators import roles_permitidos
 from accounts.permissions import (
     permiso_requerido,
     puede_consultar_ubicaciones,
     puede_gestionar_ubicaciones,
 )
-from .models import Location, ProductLocation, Container
+from django.db import models
+from .models import Location, Container, ProductContainer
 from catalog.models import Product
-from .forms import ProductLocationForm, GenerarUbicacionesForm
+from .forms import GenerarUbicacionesForm
 from django.contrib.auth.decorators import login_required
+import io
+import base64
 
 
 def es_supervisor_o_admin(user):
     return user.rol in ["SUPERVISOR", "ADMIN"]
+
+
+def generar_barcode(request):
+    if request.method == "POST":
+        codigo = request.POST.get("codigo")
+
+        # Generar código de barras en memoria
+        ean = barcode.get('code128', codigo, writer=ImageWriter())
+        buffer = io.BytesIO()
+        ean.write(buffer)
+
+        # Convertir a base64 para incrustar en HTML
+        image_base64 = base64.b64encode(buffer.getvalue()).decode("utf-8")
+
+        return render(request, "warehouse/barcode_imprimir.html", {
+            "codigo": codigo,
+            "imagen_base64": image_base64
+        })
+
+    return render(request, "warehouse/generar_barcode.html")
 
 
 @roles_permitidos("ADMIN", "SUPERVISOR")
@@ -30,10 +53,8 @@ def ubicaciones_list(request):
 
 @roles_permitidos("ADMIN", "SUPERVISOR")
 def asignaciones_list(request):
-    if not puede_gestionar_ubicaciones(request.user):
-        return HttpResponseForbidden("No tienes permiso para gestionar asignaciones.")
-    asignaciones = ProductLocation.objects.select_related("producto", "ubicacion") \
-        .order_by("producto__sku", "ubicacion__codigo")
+    asignaciones = ProductContainer.objects.select_related("producto", "contenedor") \
+        .order_by("producto__sku", "contenedor__codigo_contenedor")
     return render(request, "warehouse/asignaciones_list.html", {"asignaciones": asignaciones})
 
 
@@ -94,47 +115,75 @@ def ubicacion_generar(request):
 def contenedor_generar(request):
     codigo = f"CON-{uuid.uuid4().int >> 64}"[:15]
     cont = Container.objects.create(codigo_contenedor=codigo)
+    messages.success(
+        request, f"Contenedor {codigo} generado por {request.user.username}.")
     return redirect("warehouse:barcodes_dashboard")
 
 
 @roles_permitidos("ADMIN", "SUPERVISOR")
 def asignacion_crear(request):
     if request.method == "POST":
-        form = ProductLocationForm(request.POST)
+        form = ProductContainerForm(request.POST)
         if form.is_valid():
-            asignacion = form.save()
-            print("ASIGNACION GUARDADA:", asignacion.id,
-                  asignacion.producto_id, asignacion.ubicacion_id)
+            form.save()
             messages.success(
-                request, "Asignación producto → ubicación creada.")
+                request, "Asignación producto → contenedor creada.")
             return redirect("warehouse:asignaciones_list")
         else:
-            print("ERRORES DEL FORMULARIO:", form.errors)
             messages.error(request, f"Formulario inválido: {form.errors}")
     else:
-        form = ProductLocationForm()
+        form = ProductContainerForm()
 
     return render(request, "warehouse/asignacion_form.html", {"form": form})
 
 
-@permiso_requerido(puede_consultar_ubicaciones)
-def ubicacion_por_sku(request):
-    sku = (request.GET.get("sku") or "").strip()
+@roles_permitidos("ADMIN", "SUPERVISOR", "OPERARIO")
+def ubicacion_por_codigo_barra(request):
+    codigo_barra = (request.GET.get("codigo_barra") or "").strip()
     producto = None
     ubicaciones = []
+    tipo = None  # 🔹 nuevo flag
 
-    if sku:
-        producto = Product.objects.filter(sku__iexact=sku).first()
-
+    if codigo_barra:
+        # 1. Producto
+        producto = Product.objects.filter(
+            models.Q(codigo_barra__iexact=codigo_barra) |
+            models.Q(sku__iexact=codigo_barra)
+        ).first()
         if producto:
-            ubicaciones = ProductLocation.objects.select_related("ubicacion") \
-                .filter(producto=producto) \
-                .order_by("ubicacion__codigo")
+            ubicaciones = ProductContainer.objects.select_related(
+                "contenedor__ubicacion"
+            ).filter(producto=producto)
+            tipo = "producto"
+
+        else:
+            # 2. Ubicación
+            ubicacion = Location.objects.filter(
+                models.Q(codigo__iexact=codigo_barra) |
+                models.Q(codigo_ubicacion__iexact=codigo_barra)
+            ).first()
+            if ubicacion:
+                ubicaciones = ProductContainer.objects.select_related(
+                    "producto", "contenedor__ubicacion"
+                ).filter(contenedor__ubicacion=ubicacion)
+                tipo = "ubicacion"
+
+            else:
+                # 3. Contenedor
+                contenedor = Container.objects.filter(
+                    codigo_contenedor__iexact=codigo_barra
+                ).select_related("ubicacion").first()
+                if contenedor:
+                    ubicaciones = ProductContainer.objects.select_related(
+                        "producto", "contenedor__ubicacion"
+                    ).filter(contenedor=contenedor)
+                    tipo = "contenedor"
 
     return render(request, "warehouse/consulta_ubicacion.html", {
-        "sku": sku,
+        "codigo_barra": codigo_barra,
         "producto": producto,
         "ubicaciones": ubicaciones,
+        "tipo": tipo,  # 🔹 pasamos el flag
     })
 
 

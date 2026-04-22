@@ -1,121 +1,100 @@
 {% extends "base.html" %}
+{% load widget_tweaks %}
 {% block title %}Registrar movimiento{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-
-    <h3 class="mb-4">Registrar movimiento</h3>
-
-    <div class="mb-3">
-        <span class="badge bg-warning text-dark">
-            Stock bajo: {{ bajo_stock }}
-        </span>
-    </div>
-
+<div class="container mt-4">
+    <h2>Registrar movimiento manual</h2>
     {% if messages %}
-        {% for message in messages %}
-            <div class="alert 
-                {% if message.tags == 'success' %}alert-success
-                {% elif message.tags == 'error' %}alert-danger
-                {% elif message.tags == 'warning' %}alert-warning
-                {% else %}alert-info
-                {% endif %}">
+        <div class="mt-3">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
                 {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
             </div>
-        {% endfor %}
+            {% endfor %}
+        </div>
     {% endif %}
 
-    <div class="row justify-content-center">
-        <div class="col-12 col-lg-8">
-
-            <div class="card bg-secondary text-light shadow border-0">
-                <div class="card-body">
-
-                    <form method="post">
-                        {% csrf_token %}
-
-                        <div class="row g-3">
-
-                            <!-- Producto -->
-                            <div class="col-md-6">
-                                <label class="form-label"><strong>Producto</strong></label>
-                                <select name="producto_id" id="producto_id" class="form-select" required>
-                                    {% for p in productos %}
-                                        <option value="{{ p.id }}">
-                                            {{ p.sku }} - {{ p.nombre }} (stock: {{ p.stock_actual }})
-                                        </option>
-                                    {% endfor %}
-                                </select>
-
-                                <small class="d-block mt-2 text-light">
-                                    <strong>Ubicación sugerida:</strong>
-                                    <span id="ubicacion_text">-</span>
-                                </small>
-                            </div>
-
-                            <!-- Ubicación -->
-                            <div class="col-md-6">
-                                <label class="form-label"><strong>Ubicación</strong></label>
-                                <select name="ubicacion_id" id="ubicacion_id" class="form-select" required>
-                                    {% for u in ubicaciones %}
-                                        <option value="{{ u.id }}">
-                                            {{ u.codigo }} - {{ u.descripcion }}
-                                        </option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-
-                            <!-- Tipo -->
-                            <div class="col-md-6">
-                                <label class="form-label"><strong>Tipo</strong></label>
-                                <select name="tipo" class="form-select" required>
-                                    {% for value, label in form.fields.tipo.choices %}
-                                        <option value="{{ value }}">{{ label }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-
-                            <!-- Cantidad -->
-                            <div class="col-md-6">
-                                <label class="form-label"><strong>Cantidad</strong></label>
-                                <input type="number" name="cantidad" min="1" required class="form-control">
-                            </div>
-
-                        </div>
-
-                        <div class="mt-4 d-flex gap-2">
-                            <button class="btn" type="submit">
-                                Guardar movimiento
-                            </button>
-
-                            <a href="{% url 'inventory:dashboard' %}" class="btn">
-                                Cancelar
-                            </a>
-                        </div>
-
-                    </form>
-
-                </div>
+    <form method="post">
+        {% csrf_token %}
+        <div class="row">
+            <!-- Contenedor origen -->
+            <div class="col-md-6">
+                <label class="form-label"><strong>Contenedor origen</strong></label>
+                {{ form.contenedor_origen_id|add_class:"form-select" }}
             </div>
 
-        </div>
-    </div>
+            <!-- Producto -->
+            <div class="col-md-6">
+                <label class="form-label"><strong>Producto</strong></label>
+                {{ form.producto_id|add_class:"form-select" }}
+            </div>
 
+            <!-- Contenedor destino -->
+            <div class="col-md-6 mt-3">
+                <label class="form-label"><strong>Contenedor destino</strong></label>
+                {{ form.contenedor_id|add_class:"form-select" }}
+            </div>
+
+            <!-- Tipo de movimiento -->
+            <div class="col-md-6 mt-3">
+                <label class="form-label"><strong>Tipo de movimiento</strong></label>
+                {{ form.tipo|add_class:"form-select" }}
+            </div>
+
+            <!-- Cantidad -->
+            <div class="col-md-6 mt-3">
+                <label class="form-label"><strong>Cantidad</strong></label>
+                {{ form.cantidad|add_class:"form-control" }}
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <button type="submit" class="btn btn-secondary">Guardar movimiento</button>
+            <a href="{% url 'inventory:dashboard' %}" class="btn btn-secondary">Cancelar</a>
+        </div>
+
+    </form>
 </div>
 
 <script>
-    const ubicaciones = {{ ubicaciones_por_producto|safe }};
-    const selectProducto = document.getElementById("producto_id");
-    const ubicacionText = document.getElementById("ubicacion_text");
+    document.addEventListener("DOMContentLoaded", function() {
+        const contenedorOrigenSelect = document.getElementById("id_contenedor_origen_id");
+        const productoSelect = document.getElementById("id_producto_id");
 
-    function actualizarUbicacion() {
-        const pid = selectProducto.value;
-        const u = ubicaciones[pid];
-        ubicacionText.textContent = (u && u.length) ? u.join(", ") : "Sin ubicación asignada";
-    }
+        contenedorOrigenSelect.addEventListener("change", function() {
+            const contenedorId = this.value;
+            productoSelect.innerHTML = '<option value="">Seleccione un producto</option>';
 
-    selectProducto.addEventListener("change", actualizarUbicacion);
-    actualizarUbicacion();
+            if (!contenedorId) return;
+
+            fetch(`/productos_por_contenedor/?contenedor_id=${contenedorId}`)
+            .then(response => response.json())
+            .then(data => {
+                let selectProducto = document.getElementById("id_producto_id");
+                selectProducto.innerHTML = '<option value="">Seleccione un producto</option>';
+                data.productos.forEach(p => {
+                    let opt = document.createElement("option");
+                    opt.value = p.id;
+                    opt.textContent = `${p.sku} - ${p.nombre} (Stock: ${p.cantidad})`;
+                    selectProducto.appendChild(opt);
+                });
+            });
+        });
+    });
 </script>
-
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Selecciona todas las alertas
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(function(alert) {
+        // Después de 5 segundos, se oculta automáticamente
+        setTimeout(() => {
+            alert.classList.remove('show');
+            alert.classList.add('fade');
+        }, 5000);
+        });
+    });
+</script>
 {% endblock %}

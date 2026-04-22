@@ -1,19 +1,19 @@
 from django import forms
 from .models import PickingOrder, PickingDetail
-from warehouse.models import ProductLocation, Location
+from inventory.models import ProductContainer
+from warehouse.models import Container
 
 
 class PickingOrderForm(forms.ModelForm):
     class Meta:
         model = PickingOrder
-        # solo se crea la orden con el supervisor (request.user)
         fields = ["supervisor"]
 
 
 class PickingDetailForm(forms.ModelForm):
     class Meta:
         model = PickingDetail
-        fields = ["producto", "cantidad", "ubicacion",
+        fields = ["producto", "cantidad", "contenedor",
                   "operario", "estado", "prioridad"]
 
     def __init__(self, *args, **kwargs):
@@ -32,35 +32,36 @@ class PickingDetailForm(forms.ModelForm):
         elif self.instance and self.instance.pk:
             producto_id = self.instance.producto_id
 
-        # Si tenemos producto, filtramos ubicaciones
+        # Si tenemos producto, filtramos contenedores
         if producto_id:
-            qs = ProductLocation.objects.filter(producto_id=producto_id)
-            ubicaciones = Location.objects.filter(
-                id__in=qs.values("ubicacion_id"))
-            self.fields["ubicacion"].queryset = ubicaciones
+            qs = ProductContainer.objects.filter(
+                producto_id=producto_id).select_related("contenedor")
+            contenedores = Container.objects.filter(
+                id__in=qs.values("contenedor_id"))
+            self.fields["contenedor"].queryset = contenedores
 
             def label_with_stock(obj):
-                stock = qs.filter(ubicacion=obj).first()
-                return f"{obj.codigo} (Stock: {stock.cantidad if stock else 0})"
+                stock = qs.filter(contenedor=obj).first()
+                return f"{obj.codigo_contenedor} (Stock: {stock.cantidad if stock else 0})"
 
-            self.fields["ubicacion"].label_from_instance = label_with_stock
+            self.fields["contenedor"].label_from_instance = label_with_stock
         else:
-            self.fields["ubicacion"].queryset = Location.objects.none()
+            self.fields["contenedor"].queryset = Container.objects.none()
 
     def clean(self):
         cleaned_data = super().clean()
         producto = cleaned_data.get("producto")
-        ubicacion = cleaned_data.get("ubicacion")
+        contenedor = cleaned_data.get("contenedor")
 
-        if producto and ubicacion:
-            existe = ProductLocation.objects.filter(
+        if producto and contenedor:
+            existe = ProductContainer.objects.filter(
                 producto=producto,
-                ubicacion=ubicacion
+                contenedor=contenedor
             ).exists()
 
             if not existe:
                 raise forms.ValidationError(
-                    "La ubicación seleccionada no está asignada a ese producto."
+                    "El contenedor seleccionado no tiene asignado ese producto."
                 )
 
         return cleaned_data

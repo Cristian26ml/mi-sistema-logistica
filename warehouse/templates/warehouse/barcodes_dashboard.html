@@ -5,6 +5,10 @@
 <div class="container">
     <h2 class="mb-4">Módulo de Códigos de Barras</h2>
 
+    <a class="btn btn-dark text-start mb-3" href="{% url 'warehouse:generar_barcode' %}">
+        + Generar código de barras
+    </a>
+
     <div class="row g-4">
         <div class="col-12 col-lg-6">
             <div class="card bg-secondary text-light shadow border-0 h-100">
@@ -82,20 +86,15 @@
 
 <script>
 function printBarcode(id) {
-    // Pedir texto adicional al usuario
     var extraText = prompt("Agregar texto al código de barras:", "");
 
-    // Obtener el código de barras
     var content = document.getElementById(id).outerHTML;
 
-    // Crear ventana de impresión
     var printWindow = window.open('', '', 'width=400,height=400');
     printWindow.document.write('<html><head><title>Imprimir código</title></head><body>');
     
-    // Siempre escribir el código de barras
     printWindow.document.write(content);
 
-    // Si el usuario escribió algo, añadirlo debajo
     if (extraText && extraText.trim() !== "") {
         printWindow.document.write('<p style="margin-top:10px; font-weight:bold;">' + extraText + '</p>');
     }
@@ -103,7 +102,6 @@ function printBarcode(id) {
     printWindow.document.write('</body></html>');
     printWindow.document.close();
 
-    // Lanzar impresión siempre
     printWindow.print();
 }
 

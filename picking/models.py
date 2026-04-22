@@ -2,7 +2,8 @@ import random
 from django.conf import settings
 from django.db import models
 from catalog.models import Product
-from warehouse.models import Location
+# from warehouse.models import Location
+from warehouse.models import Container
 
 
 class PickingOrder(models.Model):
@@ -46,17 +47,25 @@ class PickingOrder(models.Model):
 class PickingDetail(models.Model):
     producto = models.ForeignKey(Product, on_delete=models.PROTECT)
     cantidad = models.PositiveIntegerField()
-    ubicacion = models.ForeignKey(Location, on_delete=models.PROTECT)
+    # 👈 ahora se liga al contenedor
+    contenedor = models.ForeignKey(
+        Container, on_delete=models.PROTECT, null=True, blank=True)
     operario = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
 
     estado = models.CharField(
         max_length=20,
-        choices=[("PENDIENTE", "Pendiente"), ("EN_PROCESO",
-                                              "En proceso"), ("COMPLETADO", "Completado")],
+        choices=[
+            ("PENDIENTE", "Pendiente"),
+            ("EN_PROCESO", "En proceso"),
+            ("COMPLETADO", "Completado")
+        ],
         default="PENDIENTE"
     )
     prioridad = models.PositiveIntegerField(default=1)
 
     orden = models.ForeignKey(
         PickingOrder, on_delete=models.CASCADE, related_name="detalles")
+
+    def __str__(self):
+        return f"{self.producto.sku} - {self.cantidad} en {self.contenedor.codigo_contenedor}"

@@ -15,7 +15,8 @@ class Product(models.Model):
     sku = models.CharField(max_length=40, unique=True)
     nombre = models.CharField(max_length=120)
     categoria = models.ForeignKey(
-        Category, on_delete=models.PROTECT, related_name="productos"
+        Category, on_delete=models.PROTECT, related_name="productos",
+        null=True, blank=True
     )
     stock_minimo = models.PositiveIntegerField(default=5)
     stock_actual = models.IntegerField(default=0)

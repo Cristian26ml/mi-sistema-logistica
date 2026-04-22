@@ -3,8 +3,10 @@ from django.db import transaction
 from catalog.models import Product, Category
 from .models import Receipt, ReceiptDetail
 from django.utils import timezone
-from inventory.models import Movement
-from warehouse.models import Location
+from inventory.services import registrar_movimiento, StockError
+# from inventory.models import Movement
+# from warehouse.models import Container
+# from inventory.models import ProductContainer
 
 
 class ReceiptImportError(Exception):
@@ -152,51 +154,28 @@ def importar_recepcion_desde_excel(*, archivo, proveedor, numero_documento, fech
 def aprobar_recepcion(*, recepcion, usuario):
     if not usuario_es_administrador(usuario):
         raise ReceiptApprovalError(
-            "Solo el Administrador puede aprobar la recepción."
-        )
+            "Solo el Administrador puede aprobar la recepción.")
 
     if recepcion.estado != Receipt.Status.PENDIENTE_APROBACION:
         raise ReceiptApprovalError(
-            "Solo se puede aprobar una recepción en estado Pendiente de aprobación."
-        )
+            "Solo se puede aprobar una recepción en estado Pendiente de aprobación.")
 
     detalles = recepcion.detalles.select_related("producto").all()
-
     if not detalles.exists():
         raise ReceiptApprovalError(
-            "La recepción no tiene líneas para aprobar."
-        )
+            "La recepción no tiene líneas para aprobar.")
 
     categoria_default, _ = Category.objects.get_or_create(
-        nombre="Sin categoría"
-    )
-
-    ubicacion_virtual, _ = Location.objects.get_or_create(
-        codigo="ALMACEN_VIRTUAL",
-        defaults={"descripcion": "Ubicación virtual de almacenamiento"}
-    )
-
+        nombre="Sin categoría")
     hubo_productos_aprobados = False
 
     for detalle in detalles:
         cantidad_aprobada = detalle.cantidad_recibida
-
         if cantidad_aprobada <= 0:
             continue
 
         producto = detalle.producto
-
         if not producto:
-            if not detalle.sku:
-                raise ReceiptApprovalError(
-                    f"No se puede crear producto para la línea '{detalle.nombre}' porque no tiene SKU."
-                )
-
-            if not detalle.codigo_barra:
-                raise ReceiptApprovalError(
-                    f"No se puede crear producto para la línea '{detalle.nombre}' porque no tiene código de barra."
-                )
-
             producto = Product.objects.create(
                 codigo_barra=detalle.codigo_barra,
                 sku=detalle.sku,
@@ -205,27 +184,23 @@ def aprobar_recepcion(*, recepcion, usuario):
                 stock_minimo=5,
                 stock_actual=0,
             )
-
             detalle.producto = producto
             detalle.save(update_fields=["producto"])
 
-        producto.stock_actual += cantidad_aprobada
-        producto.save(update_fields=["stock_actual"])
-
-        Movement.objects.create(
-            producto=producto,
-            ubicacion=ubicacion_virtual,
-            tipo=Movement.Types.ENTRADA,
-            cantidad=cantidad_aprobada,
-            usuario=usuario,
-        )
-
-        hubo_productos_aprobados = True
+        try:
+            # 🔹 Aquí usamos la lógica centralizada
+            registrar_movimiento(
+                producto_id=producto.id,
+                tipo="ENTRADA",
+                cantidad=cantidad_aprobada,
+                usuario=usuario
+            )
+            hubo_productos_aprobados = True
+        except StockError as e:
+            raise ReceiptApprovalError(f"Error al registrar ENTRADA: {e}")
 
     if not hubo_productos_aprobados:
-        raise ReceiptApprovalError(
-            "No hay cantidades recibidas para aprobar."
-        )
+        raise ReceiptApprovalError("No hay cantidades recibidas para aprobar.")
 
     recepcion.estado = Receipt.Status.APROBADA
     recepcion.aprobado_por = usuario

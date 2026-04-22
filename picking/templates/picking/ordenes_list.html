@@ -7,7 +7,7 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h3 class="mb-0">Órdenes de Picking</h3>
 
-        <a class="btn btn-secondary" href="{% url 'picking:orden_crear' %}">
+        <a class="btn btn-dark text-start mb-3" href="{% url 'picking:orden_crear' %}">
             + Nueva Orden
         </a>
     </div>
@@ -51,7 +51,7 @@
                             </td>
 
                             <td class="text-end">
-                                <a class="btn btn-outline-light btn-sm"
+                                <a class="btn btn-dark text-start mb-3"
                                     href="{% url 'picking:orden_detalle' o.id %}">
                                     Abrir
                                 </a>

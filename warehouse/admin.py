@@ -1,6 +1,6 @@
 from django.utils.html import format_html
 from django.contrib import admin
-from .models import Location, ProductLocation, Container
+from .models import Location, ProductLocation, Container, ProductContainer
 
 
 @admin.register(Location)
@@ -18,6 +18,8 @@ class LocationAdmin(admin.ModelAdmin):
 
     # 🔒 Restricciones de acceso
     def has_view_permission(self, request, obj=None):
+        if request.user.is_superuser:
+            return True
         return request.user.groups.filter(name__in=["Supervisor", "Administrador"]).exists()
 
     def has_change_permission(self, request, obj=None):
@@ -27,6 +29,8 @@ class LocationAdmin(admin.ModelAdmin):
         return request.user.groups.filter(name__in=["Supervisor", "Administrador"]).exists()
 
     def has_delete_permission(self, request, obj=None):
+        if request.user.is_superuser:
+            return True
         return request.user.groups.filter(name__in=["Supervisor", "Administrador"]).exists()
 
 
@@ -48,3 +52,11 @@ class ContainerAdmin(admin.ModelAdmin):
             return format_html('<img src="/{}" width="200" />', obj.codigo_barra_imagen)
         return "Sin código"
     mostrar_codigo_barra.short_description = "Código de barras"
+
+
+@admin.register(ProductContainer)
+class ProductContainerAdmin(admin.ModelAdmin):
+    list_display = ("producto", "contenedor", "cantidad")
+    search_fields = ("producto__sku", "producto__nombre",
+                     "contenedor__codigo_contenedor")
+    list_filter = ("contenedor",)

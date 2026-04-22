@@ -53,6 +53,7 @@
             <a class="btn btn-secondary" href="{% url 'warehouse:ubicacion_generar' %}">+ Generar ubicaciones</a>
             <a class="btn btn-secondary" href="{% url 'warehouse:asignacion_crear' %}">+ Nueva asignación</a>
             <a class="btn btn-secondary" href="{% url 'warehouse:contenedor_generar' %}">+ Generar contenedor</a>
+            <a class="btn btn-secondary" href="{% url 'inventory:contenedor_a_ubicacion' %}">+ Mover contenedor</a>
         </div>
 
         <div class="row g-4 mb-4">
@@ -156,6 +157,7 @@
                                 <th>Fecha</th>
                                 <th>Producto</th>
                                 <th>Ubicación</th>
+                                <th>Contenedor</th>
                                 <th>Tipo</th>
                                 <th>Cantidad</th>
                                 <th>Usuario</th>
@@ -163,17 +165,34 @@
                         </thead>
                         <tbody>
                             {% for m in ultimos_movimientos %}
-                            <tr>
-                                <td>{{ m.fecha|date:"d/m/Y H:i" }}</td>
-                                <td>{{ m.producto.sku }} - {{ m.producto.nombre }}</td>
-                                <td>{{ m.ubicacion.codigo }}</td>
-                                <td>{{ m.get_tipo_display }}</td>
-                                <td>{{ m.cantidad }}</td>
-                                <td>{{ m.usuario.username }}</td>
-                            </tr>
+                                {% if m.producto %}
+                                <tr>
+                                    <td>{{ m.fecha|date:"d/m/Y H:i" }}</td>
+                                    <td>{{ m.producto.sku }} - {{ m.producto.nombre }}</td>
+                                    <td>
+                                        {% if m.contenedor and m.contenedor.ubicacion %}
+                                            {{ m.contenedor.ubicacion.codigo }}
+                                        {% elif m.ubicacion %}
+                                            {{ m.ubicacion.codigo }}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if m.contenedor %}
+                                            {{ m.contenedor.codigo_contenedor }}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ m.get_tipo_display }}</td>
+                                    <td>{{ m.cantidad }}</td>
+                                    <td>{{ m.usuario.username }}</td>
+                                </tr>
+                                {% endif %}
                             {% empty %}
                             <tr>
-                                <td colspan="6" class="text-center text-light">
+                                <td colspan="7" class="text-center text-light">
                                     No hay movimientos registrados.
                                 </td>
                             </tr>

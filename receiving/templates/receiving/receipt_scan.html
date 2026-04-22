@@ -1,277 +1,212 @@
 {% extends "base.html" %}
+
 {% block title %}Recepción física{% endblock %}
 
 {% block content %}
-<h3>Recepción física</h3>
+<div class="container py-4">
+    <h3 class="mb-4">Recepción física</h3>
 
-<div style="margin-bottom:16px;">
-    <p><strong>Documento:</strong> {{ recepcion.numero_documento }}</p>
-    <p><strong>Proveedor:</strong> {{ recepcion.proveedor }}</p>
-    <p><strong>Estado:</strong> {{ recepcion.get_estado_display }}</p>
-</div>
-<div style="background:#eee; height:20px; border-radius:4px; margin-top:6px;">
-    {% if progreso < 50 %}
-        <div style="background:#f44336; height:100%; width:{{ progreso }}%;"></div> <!-- rojo -->
-    {% elif progreso < 80 %}
-        <div style="background:#ff9800; height:100%; width:{{ progreso }}%;"></div> <!-- amarillo -->
-    {% else %}
-        <div style="background:#4caf50; height:100%; width:{{ progreso }}%;"></div> <!-- verde -->
-    {% endif %}
-</div>
-
-<form method="post" style="margin-bottom:20px;">
-    {% csrf_token %}
-
-    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:30px; max-width:800px;">
-        <div>
-            <label><strong>Código escaneado</strong></label>
-            {{ form.codigo }}
-            {% if form.codigo.errors %}
-                <div style="color:red;">{{ form.codigo.errors }}</div>
-            {% endif %}
-        </div>
-
-        <div>
-            <label><strong>Cantidad recibida</strong></label>
-            {{ form.cantidad }}
-            {% if form.cantidad.errors %}
-                <div style="color:red;">{{ form.cantidad.errors }}</div>
-            {% endif %}
-        </div>
-
-        <div>
-            <label><strong>Merma</strong></label>
-            {{ form.merma }}
-            {% if form.merma.errors %}
-                <div style="color:red;">{{ form.merma.errors }}</div>
-            {% endif %}
-        </div>
-
-        <div>
-            <label><strong>Sobrante</strong></label>
-            {{ form.sobrante }}
-            {% if form.sobrante.errors %}
-                <div style="color:red;">{{ form.sobrante.errors }}</div>
-            {% endif %}
-        </div>
-
-        <div style="grid-column: 1 / -1;">
-            <label><strong>Observación</strong></label>
-            {{ form.observacion }}
-            {% if form.observacion.errors %}
-                <div style="color:red;">{{ form.observacion.errors }}</div>
-            {% endif %}
-        </div>
-    </div>
-
-    {% if form.non_field_errors %}
-        <div style="margin-top:10px; color:red;">
-            {{ form.non_field_errors }}
-        </div>
-    {% endif %}
-
-    <div style="margin-top:14px; display:flex; gap:10px; flex-wrap:wrap;">
-        <!-- Botón para escaneo incremental (+1 por cada lectura) -->
-        <button type="submit" name="registrar_escaneo" class="btn btn-primary">
-            Scannear producto
-        </button>
-
-        <!-- Botón para ingreso manual de cantidades -->
-        <button type="submit" name="ingresar_cantidades" class="btn btn-secondary">
-            Ingresar cantidades
-        </button>
-
-        <a class="btn"
-            style="text-decoration:none; padding:10px 12px; display:inline-block;"
-            href="{% url 'receiving:receipt_detail' recepcion.id %}">
-            Volver al detalle
-        </a>
-    </div>
-</form>
-
-{% if messages %}
-  {% for message in messages %}
-    <div class="alert {{ message.tags }}">{{ message }}</div>
-    {% if message.tags == "warning" %}
-      <form method="post">
-        {% csrf_token %}
-        <input type="hidden" name="codigo" value="{{ form.codigo.value }}">
-        <input type="hidden" name="cantidad" value="{{ form.cantidad.value }}">
-        <button type="submit" name="confirmar_sobre" class="btn btn-danger">Aceptar sobre‑recepción</button>
-        <button type="submit" name="cancelar_sobre" class="btn btn-secondary">Cancelar</button>
-      </form>
-    {% endif %}
-  {% endfor %}
-{% endif %}
-
-
-{% if detalle_encontrado %}
-<div style="border:1px solid #ddd; padding:14px; margin-bottom:16px; border-radius:8px;">
-    <h4 style="margin-top:0;">Producto detectado</h4>
-
-    <p><strong>SKU:</strong>
-        {% if detalle_encontrado.sku %}
-            {{ detalle_encontrado.sku }}
-        {% elif detalle_encontrado.producto %}
-            {{ detalle_encontrado.producto.sku }}
-        {% else %}
-            -
-        {% endif %}
-    </p>
-
-    <p><strong>Nombre:</strong>
-        {% if detalle_encontrado.nombre %}
-            {{ detalle_encontrado.nombre }}
-        {% elif detalle_encontrado.producto %}
-            {{ detalle_encontrado.producto.nombre }}
-        {% else %}
-            -
-        {% endif %}
-    </p>
-
-    <p><strong>Código de barra:</strong>
-        {% if detalle_encontrado.codigo_barra %}
-            {{ detalle_encontrado.codigo_barra }}
-        {% elif detalle_encontrado.producto %}
-            {{ detalle_encontrado.producto.codigo_barra }}
-        {% else %}
-            -
-        {% endif %}
-    </p>
-
-    <p><strong>Cantidad esperada:</strong> {{ detalle_encontrado.cantidad_esperada }}</p>
-    <p><strong>Cantidad recibida:</strong> {{ detalle_encontrado.cantidad_recibida }}</p>
-    <p><strong>Faltante:</strong> {{ detalle_encontrado.incidencia_faltante }}</p>
-    <p><strong>Merma:</strong> {{ detalle_encontrado.incidencia_merma }}</p>
-    <p><strong>Sobrante:</strong> {{ detalle_encontrado.incidencia_sobrante }}</p>
-</div>
-{% endif %}
-
-<div style="border:1px solid #ddd; padding:16px; border-radius:8px;">
-    <h4 style="margin-top:0;">Detalle de líneas</h4>
-
-    {% if detalles %}
-    <table style="width:100%; border-collapse: collapse;">
-        <thead>
-            <tr style="border-bottom:1px solid #ccc;">
-                <th style="text-align:left; padding:8px;">SKU</th>
-                <th style="text-align:left; padding:8px;">Producto</th>
-                <th style="text-align:left; padding:8px;">Código barra</th>
-                <th style="text-align:left; padding:8px;">Esperado</th>
-                <th style="text-align:left; padding:8px;">Recibido</th>
-                <th style="text-align:left; padding:8px;">Faltante</th>
-                <th style="text-align:left; padding:8px;">Merma</th>
-                <th style="text-align:left; padding:8px;">Sobrante</th>
-                <th style="text-align:left; padding:8px;">Estado</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for detalle in detalles %}
-            <tr style="border-bottom:1px solid #eee;">
-                <td style="padding:8px;">
-                    {% if detalle.sku %}
-                        {{ detalle.sku }}
-                    {% elif detalle.producto %}
-                        {{ detalle.producto.sku }}
-                    {% else %}
-                        -
-                    {% endif %}
-                </td>
-
-                <td style="padding:8px;">
-                    {% if detalle.nombre %}
-                        {{ detalle.nombre }}
-                    {% elif detalle.producto %}
-                        {{ detalle.producto.nombre }}
-                    {% else %}
-                        -
-                    {% endif %}
-                </td>
-
-                <td style="padding:8px;">
-                    {% if detalle.codigo_barra %}
-                        {{ detalle.codigo_barra }}
-                    {% elif detalle.producto %}
-                        {{ detalle.producto.codigo_barra }}
-                    {% else %}
-                        -
-                    {% endif %}
-                </td>
-                <td style="padding:8px;">{{ detalle.cantidad_esperada }}</td>
-                <td style="padding:8px;">{{ detalle.cantidad_recibida }}</td>
-                <td style="padding:8px;">{{ detalle.incidencia_faltante }}</td>
-                <td style="padding:8px;">{{ detalle.incidencia_merma }}</td>
-                <td style="padding:8px;">{{ detalle.incidencia_sobrante }}</td>
-                <td style="padding:8px;">
-                    {% if detalle.recepcionado %}
-                        Completo
-                    {% elif detalle.cantidad_recibida > 0 %}
-                        Parcial
-                    {% else %}
-                        Pendiente
-                    {% endif %}
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    {% else %}
-        <p>No hay líneas para esta recepción.</p>
-    {% endif %}
-</div>
-
-<div style="margin-top:16px;">
-    <!-- Botón que abre el modal -->
-    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#finalizarModal">
-        Finalizar recepción
-    </button>
-</div>
-
-<!-- Modal -->
-<div class="modal fade" id="finalizarModal" tabindex="-1" aria-labelledby="finalizarModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Finalizar recepción</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <p>¿Existe alguna observación con lo recepcionado?</p>
-                <div id="observacionField" style="display:none; margin-top:10px;">
-                    <label for="observacion">Observación:</label>
-                    <textarea name="observacion" id="observacion" class="form-control"></textarea>
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <div class="row text-center text-light text-md-start">
+                <div class="col-md-4">
+                    <p class="mb-1 small uppercase">Documento</p>
+                    <p class="h6"><strong>{{ recepcion.numero_documento }}</strong></p>
+                </div>
+                <div class="col-md-4">
+                    <p class="mb-1 small uppercase">Proveedor</p>
+                    <p class="h6"><strong>{{ recepcion.proveedor }}</strong></p>
+                </div>
+                <div class="col-md-4">
+                    <p class="mb-1 small uppercase">Estado</p>
+                    <span class="btn badge fs-6">{{ recepcion.get_estado_display }}</span>
                 </div>
             </div>
-            <div class="modal-footer">
-            <!-- Botón Sí: muestra campo de texto -->
-                <button type="button" class="btn btn-secondary" onclick="document.getElementById('observacionField').style.display='block'">
-                    Sí
-                </button>
 
-                <!-- Formulario para finalizar -->
-                <form method="post" action="{% url 'receiving:receipt_finish' recepcion.id %}">
-                    {% csrf_token %}
-                    <input type="hidden" name="observacion" id="observacionInput">
+            <div class="progress mt-4" style="height: 25px;">
+                <div class="progress-bar progress-bar-striped progress-bar-animated 
+                    {% if progreso < 50 %}bg-danger{% elif progreso < 80 %}bg-warning text-dark{% else %}bg-success{% endif %}" 
+                    role="progressbar" 
+                    style="width: {{ progreso }}%;" 
+                    aria-valuenow="{{ progreso }}" 
+                    aria-valuemin="0" 
+                    aria-valuemax="100">
+                    {{ progreso }}%
+                </div>
+            </div>
+        </div>
+    </div>
 
-                    <!-- Botón No: finaliza sin observación -->
-                    <button type="submit" class="btn btn-success" onclick="document.getElementById('observacionInput').value=''">
-                        No
-                    </button>
+    <form method="post" class="mb-5 p-4 border rounded shadow-sm">
+        {% csrf_token %}
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label fw-bold">Código escaneado</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light text-dark font-monospace"><i class="bi bi-upc-scan"></i></span>
+                    <input type="text" name="{{ form.codigo.name }}" id="{{ form.codigo.id_for_label }}" 
+                           class="form-control form-control-lg {% if form.codigo.errors %}is-invalid{% endif %}" 
+                           value="{{ form.codigo.value|default:'' }}" required>
+                </div>
+                {% if form.codigo.errors %}<div class="text-danger small">{{ form.codigo.errors }}</div>{% endif %}
+            </div>
 
-                    <!-- Botón Guardar: finaliza con observación -->
-                    <button type="submit" class="btn btn-primary" onclick="document.getElementById('observacionInput').value=document.getElementById('observacion').value">
-                        Guardar observación y finalizar
-                    </button>
-                </form>
+            <div class="col-md-6">
+                <label class="form-label fw-bold">Cantidad recibida</label>
+                <input type="number" name="{{ form.cantidad.name }}" 
+                        class="form-control form-control-lg {% if form.cantidad.errors %}is-invalid{% endif %}"  
+                        value="{{ form.cantidad.value|default:'' }}">
+
+                {% if form.cantidad.errors %}<div class="text-danger small">{{ form.cantidad.errors }}</div>{% endif %}
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label fw-bold">Merma</label>
+                <input type="number" name="{{ form.merma.name }}" class="form-control {% if form.merma.errors %}is-invalid{% endif %}" 
+                       value="{{ form.merma.value|default:0 }}">
+                {% if form.merma.errors %}<div class="text-danger small">{{ form.merma.errors }}</div>{% endif %}
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label fw-bold">Sobrante</label>
+                <input type="number" name="{{ form.sobrante.name }}" class="form-control {% if form.sobrante.errors %}is-invalid{% endif %}" 
+                       value="{{ form.sobrante.value|default:0 }}">
+                {% if form.sobrante.errors %}<div class="text-danger small">{{ form.sobrante.errors }}</div>{% endif %}
+            </div>
+        </div>
+
+        {% if form.non_field_errors %}
+            <div class="alert alert-danger mt-3">{{ form.non_field_errors }}</div>
+        {% endif %}
+
+        <div class="mt-4 d-flex flex-wrap gap-2">
+            <button type="submit" name="registrar_escaneo" class="btn btn-dark text-start mb-3">Escanear (+1)</button>
+            <button type="submit" name="ingresar_cantidades" class="btn btn-dark text-start mb-3">Ingresar manual</button>
+            <a href="{% url 'receiving:receipt_detail' recepcion.id %}" class="btn btn-dark text-start mb-3">Volver</a>
+        </div>
+    </form>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-dismissible fade show {% if message.tags == 'warning' %}alert-warning{% elif message.tags == 'success' %}alert-success{% else %}alert-info{% endif %}" role="alert">
+                {{ message }}
+                {% if message.tags == "warning" %}
+                    <div class="mt-3">
+                        <form method="post" class="d-inline">
+                            {% csrf_token %}
+                            <input type="hidden" name="codigo" value="{{ form.codigo.value }}">
+                            <input type="hidden" name="cantidad" value="{{ form.cantidad.value }}">
+                            <button type="submit" name="confirmar_sobre" class="btn btn-sm btn-dark">Aceptar sobre-recepción</button>
+                            <button type="submit" name="cancelar_sobre" class="btn btn-sm btn-outline-secondary">Cancelar</button>
+                        </form>
+                    </div>
+                {% endif %}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    {% if detalle_encontrado %}
+    <div class="alert alert-info border-info shadow-sm">
+        <h4 class="alert-heading h5 mb-3"><i class="bi bi-info-circle-fill me-2"></i>Producto detectado</h4>
+        <div class="row g-2 small">
+            <div class="col-sm-4"><strong>SKU:</strong> {{ detalle_encontrado.producto.sku|default:detalle_encontrado.sku }}</div>
+            <div class="col-sm-8"><strong>Nombre:</strong> {{ detalle_encontrado.producto.nombre|default:detalle_encontrado.nombre }}</div>
+            <div class="col-sm-4"><strong>Esperado:</strong> {{ detalle_encontrado.cantidad_esperada }}</div>
+            <div class="col-sm-4"><strong>Recibido:</strong> {{ detalle_encontrado.cantidad_recibida }}</div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="card shadow-sm overflow-hidden mt-4">
+        <div class="card-header text-light">
+            <h4 class="h6 mb-0 py-1">Detalle de líneas</h4>
+        </div>
+        <div class="table-responsive">
+            <table class="table tabla-personalizada table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>SKU / Producto</th>
+                        <th>Código</th>
+                        <th class="text-center">Esp.</th>
+                        <th class="text-center">Rec.</th>
+                        <th class="text-center">Fal.</th>
+                        <th class="text-center">Mer.</th>
+                        <th class="text-center">Sob.</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for detalle in detalles %}
+                    <tr>
+                        <td>
+                            <div class="fw-bold text-light">{{ detalle.producto.sku|default:detalle.sku }}</div>
+                            <small class="text-light">{{ detalle.producto.nombre|default:detalle.nombre }}</small>
+                        </td>
+                        <td class="small">{{ detalle.producto.codigo_barra|default:detalle.codigo_barra }}</td>
+                        <td class="text-center fw-bold">{{ detalle.cantidad_esperada }}</td>
+                        <td class="text-center fw-bold">{{ detalle.cantidad_recibida }}</td>
+                        <td class="text-center fw-bold">{{ detalle.incidencia_faltante }}</td>
+                        <td class="text-center fw-bold">{{ detalle.incidencia_merma }}</td>
+                        <td class="text-center fw-bold">{{ detalle.incidencia_sobrante }}</td>
+                        <td>
+                            {% if detalle.recepcionado %}
+                                <span class="badge bg-success-subtle text-success border border-success px-3">Completo</span>
+                            {% elif detalle.cantidad_recibida > 0 %}
+                                <span class="badge bg-warning-subtle text-warning-emphasis border border-warning px-3">Parcial</span>
+                            {% else %}
+                                <span class="badge bg-secondary-subtle text-secondary border border-secondary px-3">Pendiente</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="8" class="text-center py-4">No hay líneas para esta recepción.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="mt-4 pb-5 text-end">
+        <button type="button" class="btn btn-dark text-start mb-3" data-bs-toggle="modal" data-bs-target="#finalizarModal">
+            <i class="bi bi-check-circle me-2"></i>Finalizar recepción
+        </button>
+    </div>
+</div>
+
+<div class="modal fade" id="finalizarModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title">Finalizar recepción</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center py-4">
+                <p class="h6 mb-4">¿Existe alguna observación con lo recepcionado?</p>
+                <div class="d-flex justify-content-center gap-3 mb-3">
+                    <button type="button" class="btn btn-outline-primary" onclick="document.getElementById('observacionField').style.display='block'">Sí, agregar nota</button>
+                    
+                    <form method="post" action="{% url 'receiving:receipt_finish' recepcion.id %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="observacion" value="">
+                        <button type="submit" class="btn btn-dark">No, finalizar ahora</button>
+                    </form>
+                </div>
+
+                <div id="observacionField" style="display:none;" class="text-start mt-3 p-3 bg-light rounded">
+                    <label for="observacion" class="form-label fw-bold small">Observación:</label>
+                    <textarea name="observacion" id="observacion" class="form-control" rows="3"></textarea>
+                    <form method="post" action="{% url 'receiving:receipt_finish' recepcion.id %}" class="mt-3">
+                        {% csrf_token %}
+                        <input type="hidden" name="observacion" id="observacionInput">
+                        <button type="submit" class="btn btn-primary w-100" 
+                                onclick="document.getElementById('observacionInput').value=document.getElementById('observacion').value">
+                            Guardar y finalizar
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
 </div>
-
-<script>
-  // Copiar texto al hidden antes de enviar
-  document.querySelector('#finalizarModal form').addEventListener('submit', function() {
-    document.getElementById('observacionInput').value = document.getElementById('observacion').value;
-  });
-</script>
 {% endblock %}

@@ -11,6 +11,8 @@ urlpatterns = [
          name="contenedor_generar"),
     path("asignaciones/", views.asignaciones_list, name="asignaciones_list"),
     path("asignaciones/nueva/", views.asignacion_crear, name="asignacion_crear"),
-    path("consulta-ubicacion/", views.ubicacion_por_sku, name="consulta_ubicacion"),
+    path("consulta-ubicacion/", views.ubicacion_por_codigo_barra,
+         name="consulta_ubicacion"),
     path("barcodes/", views.barcodes_dashboard, name="barcodes_dashboard"),
+    path("generar_barcode/", views.generar_barcode, name="generar_barcode"),
 ]

@@ -1,10 +1,10 @@
 from django.http import JsonResponse
-from warehouse.models import ProductLocation
+# from warehouse.models import ProductLocation
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
-from django.utils import timezone
-
+# from django.utils import timezone
+from inventory.models import ProductContainer
 from .models import PickingOrder, PickingDetail
 from accounts.decorators import roles_permitidos
 from .forms import PickingDetailForm
@@ -13,15 +13,18 @@ from .services import actualizar_estado_orden
 
 
 def ubicaciones_por_producto(request, producto_id):
-    qs = ProductLocation.objects.filter(
-        producto_id=producto_id).select_related("ubicacion")
+    qs = ProductContainer.objects.filter(
+        producto_id=producto_id
+    ).select_related("contenedor__ubicacion")
+
     data = [
         {
-            "id": pl.ubicacion.id,
-            "codigo": pl.ubicacion.codigo,
-            "stock": pl.cantidad
+            "id": pc.contenedor.id,
+            "codigo": pc.contenedor.ubicacion.codigo if pc.contenedor.ubicacion else "-",
+            "contenedor": pc.contenedor.codigo_contenedor,
+            "stock": pc.cantidad
         }
-        for pl in qs
+        for pc in qs
     ]
     return JsonResponse(data, safe=False)
 
@@ -62,7 +65,8 @@ def orden_detalle(request, orden_id):
         form = PickingDetailForm()
 
     detalles = orden.detalles.select_related(
-        "producto", "ubicacion", "operario")
+        "producto", "contenedor", "operario"
+    )
 
     return render(request, "picking/orden_detalle.html", {
         "orden": orden,
@@ -74,7 +78,7 @@ def orden_detalle(request, orden_id):
 @roles_permitidos("ADMIN", "SUPERVISOR", "OPERARIO")
 def mis_pickings(request):
     detalles = PickingDetail.objects.select_related(
-        "producto", "ubicacion", "orden"
+        "producto", "contenedor", "orden"
     ).filter(operario=request.user, estado="PENDIENTE")
 
     return render(request, "picking/mis_pickings.html", {
@@ -98,19 +102,15 @@ def confirmar_picking(request, detalle_id):
     try:
         registrar_movimiento(
             producto_id=detalle.producto.id,
-            ubicacion_id=detalle.ubicacion.id,
+            contenedor_id=detalle.contenedor.id,
             tipo="SALIDA",
             cantidad=detalle.cantidad,
             usuario=request.user,
         )
-
         detalle.estado = "COMPLETADO"
         detalle.save(update_fields=["estado"])
-
         actualizar_estado_orden(detalle.orden)
-
         messages.success(request, "Picking confirmado y stock descontado.")
-
     except StockError as e:
         messages.error(request, str(e))
 

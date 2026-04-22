@@ -80,3 +80,20 @@ class Container(models.Model):
 
     def __str__(self):
         return f"Contenedor {self.codigo_contenedor}"
+
+
+class ProductContainer(models.Model):
+    producto = models.ForeignKey(
+        Product,
+        on_delete=models.CASCADE,
+        related_name="product_containers"   # nombre único
+    )
+    contenedor = models.ForeignKey(
+        Container,
+        on_delete=models.CASCADE,
+        related_name="product_containers"   # nombre único
+    )
+    cantidad = models.PositiveIntegerField(default=0)
+
+    def __str__(self):
+        return f"{self.producto.sku} en {self.contenedor.codigo_contenedor}: {self.cantidad}"

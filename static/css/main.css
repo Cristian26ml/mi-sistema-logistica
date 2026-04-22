@@ -1,8 +1,11 @@
-body {
+html, body {
     margin: 0;
-    font-family: Arial, sans-serif;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #001f3f; /* Tu color azul marino exacto */
+    /*overflow-y: auto;*/
 }
-
 .allbody, .container {
     background-color: #012340;
 }
@@ -12,7 +15,7 @@ body {
 }
 
 .btn {
-    background-color: #012340;
+    background-color: #2E4959;
     color: #FFFFFF;
 }
 

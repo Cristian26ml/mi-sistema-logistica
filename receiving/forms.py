@@ -40,7 +40,9 @@ class ReceiptImportForm(forms.Form):
 class ReceiptScanForm(forms.Form):
     codigo = forms.CharField(label="Código escaneado", max_length=100)
 
+    # 👇 cantidad ahora es opcional
     cantidad = forms.IntegerField(
+        required=False,          # <- esto lo hace opcional
         min_value=0,
         initial=0,
         label="Cantidad recibida"

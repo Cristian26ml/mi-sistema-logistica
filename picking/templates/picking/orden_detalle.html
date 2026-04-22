@@ -4,69 +4,60 @@
 
 {% block content %}
 <div class="container py-4">
-
-    <h3 class="mb-2">Factura #{{ orden.factura }} - Orden N°{{ orden.numero_orden }}</h3>
-    <p class="mb-4">
-        <strong>Estado de la orden:</strong>
-        <span class="badge bg-info text-dark">{{ orden.get_estado_display }}</span>
-    </p>
-
-    <div class="card bg-secondary text-light shadow border-0 mb-4">
-        <div class="card-body">
-            <h4 class="card-title mb-3">Agregar producto a la orden</h4>
-
-            <form method="post">
-                {% csrf_token %}
-
-                <div class="row g-3">
-                    <div class="col-md-6">
-                        <label for="id_producto" class="form-label">Producto</label>
-                        {{ form.producto }}
-                    </div>
-
-                    <div class="col-md-6">
-                        <label for="id_cantidad" class="form-label">Cantidad</label>
-                        {{ form.cantidad }}
-                    </div>
-
-                    <div class="col-md-6">
-                        <label for="id_ubicacion" class="form-label">Ubicación</label>
-                        {{ form.ubicacion }}
-                    </div>
-
-                    <div class="col-md-6">
-                        <label for="id_operario" class="form-label">Operario</label>
-                        {{ form.operario }}
-                    </div>
-
-                    <div class="col-md-6">
-                        <label for="id_estado" class="form-label">Estado inicial</label>
-                        {{ form.estado }}
-                    </div>
-
-                    <div class="col-md-6">
-                        <label for="id_prioridad" class="form-label">Prioridad</label>
-                        {{ form.prioridad }}
-                    </div>
-                </div>
-
-                <div class="mt-4">
-                    <button class="btn btn-primary" type="submit">Agregar</button>
-                </div>
-            </form>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">Factura #{{ orden.factura }}</h2>
+            <p class="text-muted">Orden N° {{ orden.numero_orden }}</p>
+        </div>
+        <div class="text-end">
+            <span class="badge rounded-pill bg-primary p-2 px-3 fs-6">
+                {{ orden.get_estado_display }}
+            </span>
         </div>
     </div>
 
-    <div class="card bg-secondary text-light shadow border-0">
-        <div class="card-body">
-            <h4 class="card-title mb-3">Productos en la orden</h4>
+    <div class="card shadow-sm align-items-center mb-4">
+        <div class="card-header bg-dark text-white py-3">
+            <h5 class="card-title mb-0"><i class="bi bi-plus-circle me-2"></i>Agregar producto a la orden</h5>
+        </div>
+        <table class="table tabla-personalizada table-hover align-middle mb-0">
+            <form method="post" class="row g-3">
+                {% csrf_token %}
+                
+                {% for field in form %}
+                <div class="col-md-4">
+                    <label for="{{ field.id_for_label }}" class="form-label fw-semibold text-white">
+                        {{ field.label }}
+                    </label>
+                    {# Renderizamos el campo aplicando la clase form-control de Bootstrap #}
+                    {{ field }}
+                    {% if field.errors %}
+                        <div class="text-danger small">{{ field.errors }}</div>
+                    {% endif %}
+                </div>
+                {% endfor %}
 
+                <div class="col-md-4 mt-4">
+                    <button class="btn btn-dark text-start mb-3" type="submit">
+                        <i class="bi bi-cart-plus me-2"></i>Agregar a la Lista
+                    </button>
+                </div>
+            </form>
+        </table>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header py-3">
+            <h5 class="card-title mb-0 text-light">Productos cargados</h5>
+        </div>
+        <div class="card-body p-4">
             <div class="table-responsive">
-                <table class="table table-dark table-hover align-middle mb-0">
-                    <thead>
+                <table class="table tabla-personalizada table-hover align-middle mb-0">
+                    <thead class="table-light">
                         <tr>
-                            <th>Producto</th>
+                            <th class="ps-3">Producto</th>
                             <th>Cantidad</th>
+                            <th>Contenedor</th>
                             <th>Ubicación</th>
                             <th>Operario</th>
                             <th>Estado</th>
@@ -76,16 +67,30 @@
                     <tbody>
                         {% for d in detalles %}
                         <tr>
-                            <td>{{ d.producto }}</td>
-                            <td>{{ d.cantidad }}</td>
-                            <td>{{ d.ubicacion }}</td>
+                            <td class="ps-3 fw-bold">{{ d.producto }}</td>
+                            <td><span class="badge bg-secondary">{{ d.cantidad }}</span></td>
+                            <td><code class="text-light">{{ d.contenedor.codigo_contenedor }}</code></td>
+                            <td>
+                                {% if d.contenedor.ubicacion %}
+                                    <span class="text-uppercase text-light small">{{ d.contenedor.ubicacion.codigo }}</span>
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
                             <td>{{ d.operario }}</td>
-                            <td>{{ d.get_estado_display }}</td>
-                            <td>{{ d.prioridad }}</td>
+                            <td>
+                                <span class="badge bg-light text-dark border">{{ d.get_estado_display }}</span>
+                            </td>
+                            <td>
+                                <span class="badge {% if d.prioridad == 'Alta' %}bg-danger{% else %}bg-info text-dark{% endif %}">
+                                    {{ d.prioridad }}
+                                </span>
+                            </td>
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="6" class="text-center text-light py-3">
+                            <td colspan="7" class="text-center py-5 text-muted">
+                                <i class="bi bi-box-seam d-block fs-1 mb-2"></i>
                                 No hay productos agregados a esta orden.
                             </td>
                         </tr>
@@ -95,10 +100,15 @@
             </div>
         </div>
     </div>
-
 </div>
 
 <script>
+// Mejoramos el script para asegurar que los campos tengan clases de Bootstrap dinámicamente
+document.querySelectorAll('select, input').forEach(el => {
+    el.classList.add('form-select'); // Para selects
+    if(el.tagName === 'INPUT') el.classList.add('form-control'); // Para inputs
+});
+
 document.getElementById("id_producto").addEventListener("change", function() {
     var productoId = this.value;
     if (!productoId) return;
@@ -106,16 +116,15 @@ document.getElementById("id_producto").addEventListener("change", function() {
     fetch("{% url 'picking:ubicaciones_por_producto' 0 %}".replace("0", productoId))
         .then(response => response.json())
         .then(data => {
-            var select = document.getElementById("id_ubicacion");
-            select.innerHTML = "";
+            var select = document.getElementById("id_contenedor");
+            select.innerHTML = '<option value="">Seleccione un contenedor...</option>';
             data.forEach(function(item) {
                 var option = document.createElement("option");
                 option.value = item.id;
-                option.text = item.codigo + " (Stock: " + item.stock + ")";
+                option.text = `${item.contenedor} - ${item.codigo} (Stock: ${item.stock})`;
                 select.add(option);
             });
         });
 });
 </script>
-
 {% endblock %}

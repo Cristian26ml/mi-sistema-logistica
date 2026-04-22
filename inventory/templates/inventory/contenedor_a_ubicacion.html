@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Mover contenedor a ubicación{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h3 class="mb-4">Mover contenedor a ubicación</h3>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-dark">Guardar</button>
+        <a href="{% url 'inventory:dashboard' %}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+{% endblock %}

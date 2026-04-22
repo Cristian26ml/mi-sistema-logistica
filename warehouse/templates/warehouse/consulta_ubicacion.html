@@ -4,29 +4,29 @@
 {% block content %}
 <div class="container py-4">
 
-    <h3 class="mb-4">Consultar ubicación por SKU</h3>
+    <h3 class="mb-4">Consultar ubicación por Código de barra</h3>
 
     <div class="card bg-secondary text-light shadow border-0 mb-4">
         <div class="card-body">
             <form method="get" class="row g-3 align-items-end">
                 <div class="col-12 col-md">
-                    <label for="sku" class="form-label">SKU</label>
+                    <label for="codigo_barra" class="form-label">Código de barra</label>
                     <input
                         type="text"
-                        id="sku"
-                        name="sku"
+                        id="codigo_barra"
+                        name="codigo_barra"
                         class="form-control"
-                        placeholder="SKU exacto"
-                        value="{{ sku }}"
+                        placeholder="Escanea o ingresa código de barra"
+                        value="{{ codigo_barra }}"
                     >
                 </div>
 
                 <div class="col-12 col-md-auto">
-                    <button class="btn btn-secondary w-100" type="submit">Buscar</button>
+                    <button class="btn btn-dark text-start mb-3" type="submit">Buscar</button>
                 </div>
 
                 <div class="col-12 col-md-auto">
-                    <a class="btn btn-secondary w-100" href="{% url 'warehouse:asignaciones_list' %}">
+                    <a class="btn btn-dark text-start mb-3" href="{% url 'warehouse:asignaciones_list' %}">
                         Ver asignaciones
                     </a>
                 </div>
@@ -34,44 +34,67 @@
         </div>
     </div>
 
-    {% if sku and not producto %}
+    {% if codigo_barra and not tipo %}
         <div class="alert alert-warning">
-            No se encontró el SKU.
+            No se encontró el código de barra.
         </div>
     {% endif %}
 
-    {% if producto %}
-        <div class="card bg-secondary text-light shadow border-0">
-            <div class="card-body">
+    {% if tipo %}
+    <div class="card bg-secondary text-light shadow border-0">
+        <div class="card-body">
+            {% if tipo == "producto" %}
                 <div class="mb-3">
                     <strong>{{ producto.sku }}</strong> — {{ producto.nombre }}
                 </div>
-
-                <div class="table-responsive">
-                    <table class="table table-dark table-hover align-middle mb-0">
-                        <thead>
-                            <tr>
-                                <th>Ubicación</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for u in ubicaciones %}
-                            <tr>
-                                <td>{{ u.ubicacion.codigo }}</td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td class="text-center text-light-emphasis py-3">
-                                    Este producto no tiene ubicación asignada.
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+            {% elif tipo == "contenedor" %}
+                <div class="mb-3">
+                    <strong>Contenedor:</strong> {{ codigo_barra }}
                 </div>
+            {% elif tipo == "ubicacion" %}
+                <div class="mb-3">
+                    <strong>Ubicación:</strong> {{ codigo_barra }}
+                </div>
+            {% endif %}
+
+            <div class="table-responsive">
+                <table class="table table-dark table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>SKU</th>
+                            <th>Producto</th>
+                            <th>Contenedor</th>
+                            <th>Ubicación</th>
+                            <th>Cantidad</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for u in ubicaciones %}
+                        <tr>
+                            <td>{{ u.producto.sku }}</td>
+                            <td>{{ u.producto.nombre }}</td>
+                            <td>{{ u.contenedor.codigo_contenedor }}</td>
+                            <td>
+                                {% if u.contenedor.ubicacion %}
+                                    {{ u.contenedor.ubicacion.codigo }}
+                                {% else %}
+                                    Virtual (sin ubicación física)
+                                {% endif %}
+                            </td>
+                            <td>{{ u.cantidad }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center text-light py-3">
+                                No hay productos asignados.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
+    </div>
     {% endif %}
-
 </div>
 {% endblock %}
